@@ -15,6 +15,11 @@ model answer {
   poll_answerTopoll poll   @relation(fields: [poll], references: [id])
 }
 
+model pendingemails {
+  answers String[]
+  email   String   @id
+}
+
 model poll {
   created  DateTime? @default(now())
   end_date DateTime

@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 @Injectable()
 export class VoterService {
 
-    async voterValidationNoEmail({ipAddress, answers, pollId}): Promise<string> {
+    async voterValidationNoEmail({ipAddress, answers, pollId}): Promise<{voterId: string, message: string, validVote: boolean}> {
         const pollVoters: {voters: string[]} = await prisma.poll.findOne({
             where: {id: pollId},
             select: { voters: true },
@@ -17,12 +17,17 @@ export class VoterService {
             where: {ip: ipAddress},
         });
 
-        const voterHasVotedCheck = pollVoters.voters.some(pollVoter => {
+        // checks if voter has already voted on poll
+        const pollVoterId = pollVoters.voters.find(pollVoter => {
             return votersWithIp.some(voter => voter.id === pollVoter);
         });
 
-        if (voterHasVotedCheck) {
-            return false;
+        if (pollVoterId) {
+            return {
+                voterId: pollVoterId,
+                message: 'Validation failed; has already voted on poll.',
+                validVote: false,
+            };
         }
 
         const newVoter = await prisma.voter.create({
@@ -39,10 +44,14 @@ export class VoterService {
             where: { id: pollId },
         });
 
-        return newVoter.id;
+        return {
+            voterId: newVoter.id,
+            message: 'Validation passed; Created new voter in database.',
+            validVote: true,
+        };
     }
 
-    async voterValidationWithEmail({email, ipAddress, answers, pollId}): Promise<string> {
+    async voterValidationWithEmail({email, ipAddress, answers, pollId}): Promise<{voterId: string, message: string, validVote: boolean}> {
         const pollVoters: {voters: string[]} = await prisma.poll.findOne({
             where: {id: pollId},
             select: { voters: true },
@@ -52,7 +61,34 @@ export class VoterService {
             where: {email},
         });
 
-        return '';
+        // If no record of voter with that email then send email confirmation email.
+        if (!voterWithEmail) {
+            const pendingEmail = await prisma.pendingemails.findOne({
+                where: {email},
+            });
+            if (pendingEmail) {
+                return {
+                    voterId: 'newVoter.id',
+                    message: 'Email pending verification.',
+                    validVote: false,
+                };
+            }
+            await prisma.pendingemails.create({
+                data: {
+                    email,
+                    answers: { set: answers },
+                }
+
+
+            });
+        }
+
+
+        return {
+            voterId: 'newVoter.id',
+            message: 'Validation passed; Created new voter in database.',
+            validVote: false,
+        };
     }
 
 }

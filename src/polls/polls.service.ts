@@ -113,21 +113,16 @@ export class PollsService {
 
         const { ipAddress, answers, email } = voteData;
 
+        debugger;
+
         // No email
         if (!parsedOptions.validateEmail) {
-          const voterId = await this.voterService.voterValidationNoEmail({email, ipAddress, answers, pollId});
-          if (voterId) {
-             return  {
-                 pollId,
-                 validVote: true,
-             };
-          }
+          const voterValidationResponse = await this.voterService.voterValidationNoEmail({ipAddress, answers, pollId});
+          return  voterValidationResponse;
         }
+        const voterValidationResponse = await this.voterService.voterValidationWithEmail({email, ipAddress, answers, pollId});
 
-        return  {
-            pollId,
-            validVote: false,
-        };
+        return voterValidationResponse;
 
     }
 }

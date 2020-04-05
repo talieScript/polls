@@ -10,10 +10,6 @@ export interface Options {
      */
     validateEmail: boolean;
     /**
-     * Validate votes with ip adresss
-     */
-    validateIp: boolean;
-    /**
      * The amount of answers each user can give
      */
     choiceNo: number;
