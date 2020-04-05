@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Voter } from './interfaces/voter.interface';
 import { PrismaClient } from '@prisma/client';
+import { EmailService } from 'src/email/email.service';
 
 const prisma = new PrismaClient();
 
 @Injectable()
 export class VoterService {
+    constructor(
+        private readonly emailService: EmailService,
+    ) {}
 
     async voterValidationNoEmail({ipAddress, answers, pollId}): Promise<{voterId: string, message: string, validVote: boolean}> {
         const pollVoters: {voters: string[]} = await prisma.poll.findOne({
@@ -77,10 +81,12 @@ export class VoterService {
                 data: {
                     email,
                     answers: { set: answers },
-                }
-
-
+                },
             });
+
+            this.emailService.sendValidationEmail(email);
+
+
         }
 
 
