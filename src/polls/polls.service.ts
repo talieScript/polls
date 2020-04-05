@@ -77,12 +77,14 @@ export class PollsService {
         });
 
         // Get poll and parse poll options
-        const poll: Poll = await prisma.poll.findOne({
+        const pollOptions: { options: string } = await prisma.poll.findOne({
             where: {id: pollId},
+            select: {options: true},
         });
-        const pollOptions: Options = JSON.parse(poll.options);
 
-        if (pollOptions.validateEmail && !voteData.email) {
+        const parsedOptions = JSON.parse(pollOptions.options);
+
+        if (parsedOptions.validateEmail && !voteData.email) {
             throw new HttpException({
                 status: HttpStatus.NOT_ACCEPTABLE,
                 error: `Email required for vote validation.`,
@@ -90,17 +92,17 @@ export class PollsService {
         }
 
         //  if choiceNoStrict check answers given are the same as the choiceNo
-        if (pollOptions.choiceNoStrict) {
-            const validStrictAmount = voteData.answers.length === pollOptions.choiceNo;
+        if (parsedOptions.choiceNoStrict) {
+            const validStrictAmount = voteData.answers.length === parsedOptions.choiceNo;
             if (!validStrictAmount) {
                 throw new HttpException({
                     status: HttpStatus.NOT_ACCEPTABLE,
-                    error: `Answer choice number is strict, exactly ${pollOptions.choiceNo} must be given`,
+                    error: `Answer choice number is strict, exactly ${parsedOptions.choiceNo} must be given`,
                 }, 406);
             }
         } else {
             // Check answers given match poll number choice
-            const validAnswerAmount = voteData.answers.length <= pollOptions.choiceNo;
+            const validAnswerAmount = voteData.answers.length <= parsedOptions.choiceNo;
             if (!validAnswerAmount) {
                 throw new HttpException({
                     status: HttpStatus.NOT_ACCEPTABLE,
@@ -109,12 +111,23 @@ export class PollsService {
             }
         }
 
-        const { ipAddress} = voteData;
+        const { ipAddress, answers } = voteData;
 
         // No email
-        if (!pollOptions.validateEmail) {
-          this.voterService.voterValidationNoEmail({ipAddress, pollId});
+        if (!parsedOptions.validateEmail) {
+          const voterId = await this.voterService.voterValidationNoEmail({ipAddress, answers, pollId});
+          if (voterId) {
+             return  {
+                 pollId,
+                 validVote: true,
+             };
+          }
         }
+
+        return  {
+            pollId,
+            validVote: false,
+        };
 
     }
 }

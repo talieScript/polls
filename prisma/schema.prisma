@@ -22,13 +22,13 @@ model poll {
   options  String
   question String
   title    String
+  voters   String[]
   answer   answer[]
 }
 
 model voter {
-  answers       String[]
-  email         String?  @unique
-  id            String   @default(dbgenerated()) @id
-  ip            String
-  polls_created String[]
+  answers String[]
+  email   String?  @unique
+  id      String   @default(dbgenerated()) @id
+  ip      String
 }
