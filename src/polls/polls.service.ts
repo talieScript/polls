@@ -4,11 +4,15 @@ import { Answer } from '../answers/interfaces/answer.interface';
 import { PrismaClient } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
+import { VoterService } from '../voter/voter.service';
 
 const prisma = new PrismaClient();
 
 @Injectable()
 export class PollsService {
+    constructor(
+        private readonly voterService: VoterService,
+    ) {}
     /**
      *
      * @param createPollData
@@ -78,10 +82,16 @@ export class PollsService {
         });
         const pollOptions: Options = JSON.parse(poll.options);
 
+        if (pollOptions.validateEmail && !voteData.email) {
+            throw new HttpException({
+                status: HttpStatus.NOT_ACCEPTABLE,
+                error: `Email required for vote validation.`,
+            }, 406);
+        }
 
         //  if choiceNoStrict check answers given are the same as the choiceNo
         if (pollOptions.choiceNoStrict) {
-            const validStrictAmount = voteData.answers.length === pollOptions.choiceNo
+            const validStrictAmount = voteData.answers.length === pollOptions.choiceNo;
             if (!validStrictAmount) {
                 throw new HttpException({
                     status: HttpStatus.NOT_ACCEPTABLE,
@@ -99,12 +109,12 @@ export class PollsService {
             }
         }
 
+        const { ipAddress} = voteData;
 
-        // // check ip
-        // const ipMatch = poll.voters.some(voter => voter.ipAddress === voterInfo.ipAddress);
-        // // check email
-        // const emailMatch = poll.voters.some(voter => voter.email === voterInfo.email);
-        // // TODO:check email is verified
+        // No email
+        if (!pollOptions.validateEmail) {
+          this.voterService.voterValidationNoEmail({ipAddress, pollId});
+        }
 
     }
 }
