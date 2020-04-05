@@ -27,3 +27,9 @@ CREATE TABLE voter (
   answers       uuid[],
   PRIMARY KEY (id)
 )
+
+CREATE TABLE pendingEmails (
+	email       VARCHAR UNIQUE,
+	answers     uuid[],
+	PRIMARY KEY (email)
+)
