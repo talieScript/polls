@@ -42,4 +42,17 @@ export class VoterService {
         return newVoter.id;
     }
 
+    async voterValidationWithEmail({email, ipAddress, answers, pollId}) {
+        const pollVoters: {voters: string[]} = await prisma.poll.findOne({
+            where: {id: pollId},
+            select: { voters: true },
+        });
+
+        const voterWithEmail = await prisma.voter.findOne({
+            where: {email},
+        });
+
+
+    }
+
 }
