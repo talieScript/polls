@@ -6,7 +6,7 @@ export class EmailController {
     constructor(private readonly emailService: EmailService) { }
 
     @Get()
-    async validateEmail(@Query('email') email: string, @Query('redirectPage') redirectPage: string) {
-        this.emailService.validateEmail({email, redirectPage});
+    async validateEmail(@Query('email') email: string, @Query('redirect') redirect: string) {
+        this.emailService.validateEmail({email, redirect});
     }
 }

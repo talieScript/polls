@@ -47,11 +47,13 @@ export class EmailService {
         });
     }
 
-    async validateEmail({email, redirectPage}) {
+    async validateEmail({email, redirect}) {
         // Get the pending email data
         const pendingEmailData: PendingEmailData = await prisma.pendingemail.findOne({
             where: { email },
         });
+
+        debugger;
 
         if (!pendingEmailData || pendingEmailData.answers.length) {
             throw new HttpException({
