@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { Voter } from './interfaces/voter.interface';
 import { PrismaClient } from '@prisma/client';
 import { EmailService } from 'src/email/email.service';
@@ -8,6 +8,7 @@ const prisma = new PrismaClient();
 @Injectable()
 export class VoterService {
     constructor(
+        @Inject(forwardRef(() => EmailService))
         private readonly emailService: EmailService,
     ) {}
 
@@ -67,7 +68,7 @@ export class VoterService {
 
         // If no record of voter with that email then send email confirmation email.
         if (!voterWithEmail) {
-            const pendingEmail = await prisma.pendingemails.findOne({
+            const pendingEmail = await prisma.pendingemail.findOne({
                 where: {email},
             });
             if (pendingEmail) {
@@ -77,24 +78,36 @@ export class VoterService {
                     validVote: false,
                 };
             }
-            await prisma.pendingemails.create({
+            await prisma.pendingemail.create({
                 data: {
                     email,
                     answers: { set: answers },
+                    ip: ipAddress,
                 },
             });
 
-            this.emailService.sendValidationEmail(email);
+            const redirectPage = 'poll';
 
+            this.emailService.sendValidationEmail({email, redirectPage});
 
         }
 
 
         return {
             voterId: 'newVoter.id',
-            message: 'Validation passed; Created new voter in database.',
+            message: 'Validation passed; Varification email sent.',
             validVote: false,
         };
+    }
+
+    createVoterWithEamil({email, ip, answers}) {
+        return prisma.voter.create({
+            data: {
+                ip,
+                answers: { set: answers },
+                email,
+            },
+        });
     }
 
 }

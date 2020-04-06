@@ -15,9 +15,10 @@ model answer {
   poll_answerTopoll poll   @relation(fields: [poll], references: [id])
 }
 
-model pendingemails {
+model pendingemail {
   answers String[]
   email   String   @id
+  ip      String
 }
 
 model poll {
