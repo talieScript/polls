@@ -16,7 +16,7 @@ export class PollsController {
 
   @Post('/:pollId')
   async vote(@Param('pollId') pollId: string, @Body(new ValidationPipe()) voteData: VoteDto) {
-    const validAndPollId = await this.pollsService.castVote({voteData, pollId});
+    const validAndPollId = await this.pollsService.validateVote({voteData, pollId});
     return validAndPollId;
   }
 }

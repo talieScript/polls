@@ -53,7 +53,7 @@ export class PollsService {
      * @param voteData
      * @summary Votes on a poll and creates a voter if not already existent
      */
-    async castVote({voteData, pollId}) {
+    async validateVote({voteData, pollId}) {
         const pollAnswers: Answer[] = await prisma.answer.findMany({
             where: { poll: pollId },
         })
@@ -113,8 +113,6 @@ export class PollsService {
 
         const { ipAddress, answers, email } = voteData;
 
-        debugger;
-
         // No email
         if (!parsedOptions.validateEmail) {
           const voterValidationResponse = await this.voterService.voterValidationNoEmail({ipAddress, answers, pollId});
@@ -123,6 +121,36 @@ export class PollsService {
         const voterValidationResponse = await this.voterService.voterValidationWithEmail({email, ipAddress, answers, pollId});
 
         return voterValidationResponse;
+    }
 
+    async castVote({voterId, answers}) {
+        // Add votes to answers
+
+        const answersFromDatabase: Answer[] = await Promise.all(answers.map(answerId => {
+            return prisma.answer.findOne({
+                where: { id: answerId },
+                include: { poll_answerTopoll: true },
+            });
+        }));
+
+        const pollId = await answersFromDatabase[0].poll;
+
+        const poll = await prisma.poll.findOne({
+            where: { id: pollId },
+            select: { voters: true },
+        });
+
+        // add voter to poll
+        await prisma.poll.update({
+            where: { id: pollId },
+            data: { voters: { set: [...poll.voters, voterId]}},
+        });
+
+        return Promise.all(answersFromDatabase.map(answer => {
+            return prisma.answer.update({
+                where: { id: answer.id },
+                data: { votes: answer.votes + 1 },
+            });
+        }));
     }
 }

@@ -2,7 +2,8 @@ import { Injectable, HttpStatus, HttpException, Inject, forwardRef } from '@nest
 import * as nodemailer from 'nodemailer';
 import { PrismaClient } from '@prisma/client';
 import { PendingEmailData } from './interfaces/pendingEmailData';
-import { VoterService } from 'src/voter/voter.service';
+import { VoterService } from '../voter/voter.service';
+import { PollsService } from '../polls/polls.service';
 
 const prisma = new PrismaClient();
 @Injectable()
@@ -10,6 +11,8 @@ export class EmailService {
     constructor(
         @Inject(forwardRef(() => VoterService))
         private readonly voterService: VoterService,
+        @Inject(forwardRef(() => PollsService))
+        private readonly pollService: PollsService,
     ) {}
 
     async sendValidationEmail({email, redirectPage}) {
@@ -53,16 +56,15 @@ export class EmailService {
             where: { email },
         });
 
-        debugger;
-
-        if (!pendingEmailData || pendingEmailData.answers.length) {
+        if (!pendingEmailData || !pendingEmailData.answers.length) {
             throw new HttpException({
                     status: HttpStatus.NOT_ACCEPTABLE,
                     error: `Link may be expired, try voting again.`,
                 }, 406);
         }
+
         // Create voter
-        await this.voterService.createVoterWithEamil(pendingEmailData)
+        const newVoter = await this.voterService.createVoterWithEamil(pendingEmailData)
         .catch(error => {
             throw new HttpException({
                     status: HttpStatus.NOT_ACCEPTABLE,
@@ -70,7 +72,13 @@ export class EmailService {
                 }, 406);
         });
 
+        // Delete pedning email
+        await prisma.pendingemail.delete({
+            where: { email },
+        });
+
         // add vote
+        await this.pollService.castVote({voterId: newVoter.id, answers: pendingEmailData.answers });
 
         // redirect to redirect page
     }

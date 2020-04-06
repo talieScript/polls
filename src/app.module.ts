@@ -10,6 +10,6 @@ import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [PollsModule, VoterModule, EmailModule, ConfigModule.forRoot()],
   controllers: [AppController],
-  providers: [AppService, PollsService],
+  providers: [AppService],
 })
 export class AppModule {}

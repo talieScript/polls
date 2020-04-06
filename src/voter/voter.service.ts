@@ -92,7 +92,6 @@ export class VoterService {
 
         }
 
-
         return {
             voterId: 'newVoter.id',
             message: 'Validation passed; Varification email sent.',
