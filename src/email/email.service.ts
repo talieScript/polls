@@ -57,20 +57,18 @@ export class EmailService {
         });
 
         if (!pendingEmailData || !pendingEmailData.answers.length) {
-            throw new HttpException({
-                    status: HttpStatus.NOT_ACCEPTABLE,
-                    error: `Link may be expired, try voting again.`,
-                }, 406);
+            return false;
         }
 
         // Create voter
         const newVoter = await this.voterService.createVoterWithEamil(pendingEmailData)
         .catch(error => {
-            throw new HttpException({
-                    status: HttpStatus.NOT_ACCEPTABLE,
-                    error: `Link may be expired, try voting again.`,
-                }, 406);
+            return null;
         });
+
+        if (!newVoter) {
+            return false;
+        }
 
         // Delete pedning email
         await prisma.pendingemail.delete({
@@ -80,6 +78,6 @@ export class EmailService {
         // add vote
         await this.pollService.castVote({voterId: newVoter.id, answers: pendingEmailData.answers });
 
-        // redirect to redirect page
+        return true;
     }
 }
