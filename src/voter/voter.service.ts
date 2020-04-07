@@ -2,6 +2,7 @@ import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { Voter } from './interfaces/voter.interface';
 import { PrismaClient } from '@prisma/client';
 import { EmailService } from 'src/email/email.service';
+import { PollsService } from '../polls/polls.service';
 
 const prisma = new PrismaClient();
 
@@ -10,6 +11,8 @@ export class VoterService {
     constructor(
         @Inject(forwardRef(() => EmailService))
         private readonly emailService: EmailService,
+        @Inject(forwardRef(() => PollsService))
+        private readonly pollService: PollsService,
     ) {}
 
     async voterValidationNoEmail({ipAddress, answers, pollId}): Promise<{voterId: string, message: string, validVote: boolean}> {
@@ -73,7 +76,7 @@ export class VoterService {
             });
             if (pendingEmail) {
                 return {
-                    voterId: 'newVoter.id',
+                    voterId: '',
                     message: 'Email pending verification.',
                     validVote: false,
                 };
@@ -86,17 +89,26 @@ export class VoterService {
                 },
             });
 
-            const redirectPage = 'poll';
+            this.emailService.sendValidationEmail(email);
 
-            this.emailService.sendValidationEmail({email, redirectPage});
-
+            return {
+                voterId: '',
+                message: 'Validation passed; Varification email sent.',
+                validVote: false,
+            };
         }
 
+        await this.pollService.castVote({
+            voterId: voterWithEmail.id,
+            answers,
+        });
+
         return {
-            voterId: 'newVoter.id',
-            message: 'Validation passed; Varification email sent.',
-            validVote: false,
-        };
+            voterId: voterWithEmail.id,
+            message: 'Voter found; Vote has been cast.',
+            validVote: true,
+        }
+
     }
 
     createVoterWithEamil({email, ip, answers}) {
