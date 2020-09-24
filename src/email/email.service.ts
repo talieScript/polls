@@ -60,6 +60,8 @@ export class EmailService {
             return false;
         }
 
+        
+
         // Create voter
         const newVoter = await this.voterService.createVoterWithEamil(pendingEmailData)
         .catch(error => {
