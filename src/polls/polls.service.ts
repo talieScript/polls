@@ -4,11 +4,15 @@ import { Answer } from '../answers/interfaces/answer.interface';
 import { PrismaClient } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
+import { VoterService } from '../voter/voter.service';
 
 const prisma = new PrismaClient();
 
 @Injectable()
 export class PollsService {
+    constructor(
+        private readonly voterService: VoterService,
+    ) {}
     /**
      *
      * @param createPollData
@@ -49,7 +53,7 @@ export class PollsService {
      * @param voteData
      * @summary Votes on a poll and creates a voter if not already existent
      */
-    async castVote({voteData, pollId}) {
+    async validateVote({voteData, pollId}) {
         const pollAnswers: Answer[] = await prisma.answer.findMany({
             where: { poll: pollId },
         })
@@ -73,24 +77,32 @@ export class PollsService {
         });
 
         // Get poll and parse poll options
-        const poll: Poll = await prisma.poll.findOne({
+        const pollOptions: { options: string } = await prisma.poll.findOne({
             where: {id: pollId},
+            select: {options: true},
         });
-        const pollOptions: Options = JSON.parse(poll.options);
 
+        const parsedOptions = JSON.parse(pollOptions.options);
+
+        if (parsedOptions.validateEmail && !voteData.email) {
+            throw new HttpException({
+                status: HttpStatus.NOT_ACCEPTABLE,
+                error: `Email required for vote validation.`,
+            }, 406);
+        }
 
         //  if choiceNoStrict check answers given are the same as the choiceNo
-        if (pollOptions.choiceNoStrict) {
-            const validStrictAmount = voteData.answers.length === pollOptions.choiceNo
+        if (parsedOptions.choiceNoStrict) {
+            const validStrictAmount = voteData.answers.length === parsedOptions.choiceNo;
             if (!validStrictAmount) {
                 throw new HttpException({
                     status: HttpStatus.NOT_ACCEPTABLE,
-                    error: `Answer choice number is strict, exactly ${pollOptions.choiceNo} must be given`,
+                    error: `Answer choice number is strict, exactly ${parsedOptions.choiceNo} must be given`,
                 }, 406);
             }
         } else {
             // Check answers given match poll number choice
-            const validAnswerAmount = voteData.answers.length <= pollOptions.choiceNo;
+            const validAnswerAmount = voteData.answers.length <= parsedOptions.choiceNo;
             if (!validAnswerAmount) {
                 throw new HttpException({
                     status: HttpStatus.NOT_ACCEPTABLE,
@@ -99,12 +111,43 @@ export class PollsService {
             }
         }
 
+        const { ipAddress, answers, email } = voteData;
 
-        // // check ip
-        // const ipMatch = poll.voters.some(voter => voter.ipAddress === voterInfo.ipAddress);
-        // // check email
-        // const emailMatch = poll.voters.some(voter => voter.email === voterInfo.email);
-        // // TODO:check email is verified
+        const voterValidationResponse = parsedOptions.validateEmail
+            ? await this.voterService.voterValidationWithEmail({email, ipAddress, answers, pollId})
+            : await this.voterService.voterValidationNoEmail({ipAddress, answers, pollId});;
 
+        return voterValidationResponse;
+    }
+
+    async castVote({voterId, answers}) {
+        // Add votes to answers
+
+        const answersFromDatabase: Answer[] = await Promise.all(answers.map(answerId => {
+            return prisma.answer.findOne({
+                where: { id: answerId },
+                include: { poll_answerTopoll: true },
+            });
+        }));
+
+        const pollId = await answersFromDatabase[0].poll;
+
+        const poll = await prisma.poll.findOne({
+            where: { id: pollId },
+            select: { voters: true },
+        });
+
+        // add voter to poll
+        await prisma.poll.update({
+            where: { id: pollId },
+            data: { voters: { set: [...poll.voters, voterId]}},
+        });
+
+        return Promise.all(answersFromDatabase.map(answer => {
+            return prisma.answer.update({
+                where: { id: answer.id },
+                data: { votes: answer.votes + 1 },
+            });
+        }));
     }
 }

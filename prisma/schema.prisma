@@ -15,6 +15,12 @@ model answer {
   poll_answerTopoll poll   @relation(fields: [poll], references: [id])
 }
 
+model pendingemail {
+  answers String[]
+  email   String   @id
+  ip      String
+}
+
 model poll {
   created  DateTime? @default(now())
   end_date DateTime
@@ -22,13 +28,13 @@ model poll {
   options  String
   question String
   title    String
+  voters   String[]
   answer   answer[]
 }
 
 model voter {
-  answers       String[]
-  email         String?  @unique
-  id            String   @default(dbgenerated()) @id
-  ip            String
-  polls_created String[]
+  answers String[]
+  email   String?  @unique
+  id      String   @default(dbgenerated()) @id
+  ip      String
 }

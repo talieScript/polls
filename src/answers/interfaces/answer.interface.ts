@@ -1,3 +1,5 @@
+import { Poll } from "src/polls/interfaces/poll.interface";
+
 export interface Answer {
     /**
      * The actual answer in a string
@@ -11,4 +13,9 @@ export interface Answer {
      * id
      */
     id: string;
+    /**
+     * poll referance
+     */
+    poll: string
+
 }
