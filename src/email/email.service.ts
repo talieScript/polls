@@ -51,6 +51,7 @@ export class EmailService {
     }
 
     async validateEmail({email, redirect}) {
+
         // Get the pending email data
         const pendingEmailData: PendingEmailData = await prisma.pendingemail.findOne({
             where: { email },
@@ -60,15 +61,20 @@ export class EmailService {
             return false;
         }
 
-        
-
-        // Create voter
-        const newVoter = await this.voterService.createVoterWithEamil(pendingEmailData)
-        .catch(error => {
-            return null;
+        let voter = await this.voterService.getVoter({
+            where: { email }
         });
 
-        if (!newVoter) {
+        // If voter not found in database create a new one 
+        if (!voter) {
+            // Create voter
+            voter = await this.voterService.createVoterWithEamil(pendingEmailData)
+            .catch(error => {
+                return null;
+            });
+        }
+
+        if (!voter) {
             return false;
         }
 
@@ -78,7 +84,9 @@ export class EmailService {
         });
 
         // add vote
-        await this.pollService.castVote({voterId: newVoter.id, answers: pendingEmailData.answers });
+        await this.pollService.castVote({
+            voterId: voter.id, answers: pendingEmailData.answers 
+        });
 
         return true;
     }
