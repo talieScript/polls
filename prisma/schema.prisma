@@ -30,7 +30,7 @@ model Poll {
   question String
   title    String
   voters   String[]
-  answer   Answer[]
+  answers   Answer[]
 }
 
 model Voter {

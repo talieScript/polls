@@ -26,17 +26,18 @@ export class PollsService {
             createPollData.options = JSON.stringify(createPollData.options);
         }
 
-        // put poll in a queue to be created
+        // TODO: put poll in a queue to be created
 
         const { endDate, title, question, options, answers } = createPollData;
         const newPoll =  await prisma.poll.create({
             data: {
+                id: uuidv4(),
                 title,
                 question,
                 options,
                 created: dayjs().toISOString(),
                 end_date: endDate,
-                answer: {
+                answers: {
                    create: answers.map((answer)  => ({
                                 id: uuidv4(),
                                 answer_string: answer,
@@ -77,12 +78,12 @@ export class PollsService {
         });
 
         // Get poll and parse poll options
-        const pollOptions: { options: string } = await prisma.poll.findOne({
+        const pollData: { options: string } = await prisma.poll.findOne({
             where: {id: pollId},
-            select: {options: true},
+            select: {options: true, voters: true},
         });
 
-        const parsedOptions = JSON.parse(pollOptions.options);
+        const parsedOptions = JSON.parse(pollData.options);
 
         if (parsedOptions.validateEmail && !voteData.email) {
             throw new HttpException({
@@ -111,6 +112,16 @@ export class PollsService {
             }
         }
 
+        if (parsedOptions.validateIp) {
+            // get all ip of all the voters on this poll
+            const voterIps = prisma.voter.findMany({
+                where: { 
+
+                }
+            })
+            // check if ip is in poll voter ips
+        }
+
         const { ipAddress, answers, email } = voteData;
 
         const voterValidationResponse = parsedOptions.validateEmail
@@ -126,7 +137,6 @@ export class PollsService {
         const answersFromDatabase: Answer[] = await Promise.all(answers.map(answerId => {
             return prisma.answer.findOne({
                 where: { id: answerId },
-                include: { poll_answerTopoll: true },
             });
         }));
 

@@ -1,7 +1,8 @@
 import { Injectable, forwardRef, Inject } from '@nestjs/common';
-import { PrismaClient, FindOnevoterArgs } from '@prisma/client';
+import { PrismaClient, FindOneVoterArgs } from '@prisma/client';
 import { EmailService } from 'src/email/email.service';
 import { PollsService } from '../polls/polls.service';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
@@ -39,8 +40,11 @@ export class VoterService {
 
         const newVoter = await prisma.voter.create({
             data: {
+                id: uuidv4(),
                 ip: ipAddress,
-                answers: { set: answers },
+                answers: {
+                    connect: answers.map(answerId => ({ id: answerId })),
+                },
             },
         });
 
@@ -49,6 +53,11 @@ export class VoterService {
                 voters: { set: [...pollVoters.voters, newVoter.id] },
             },
             where: { id: pollId },
+        });
+
+        await this.pollService.castVote({
+            voterId: newVoter.id,
+            answers,
         });
 
         return {
@@ -80,7 +89,7 @@ export class VoterService {
 
         // If no record of voter with that email then send email confirmation email.
         if (!currentVoter) {
-            const pendingEmail = await prisma.pendingemail.findOne({
+            const pendingEmail = await prisma.pendingEmail.findOne({
                 where: {email},
             });
             // if this voter has already voted and the email is awaiting validation
@@ -91,7 +100,7 @@ export class VoterService {
                     validVote: false,
                 };
             }
-            await prisma.pendingemail.create({
+            await prisma.pendingEmail.create({
                 data: {
                     email,
                     answers: { set: answers },
@@ -125,13 +134,13 @@ export class VoterService {
         return prisma.voter.create({
             data: {
                 ip,
-                answers: { set: answers },
+                answers: answers,
                 email,
             },
         });
     }
 
-    async getVoter(findOptions: FindOnevoterArgs) {
+    async getVoter(findOptions: FindOneVoterArgs) {
         return await prisma.voter.findOne(findOptions);
     }
 

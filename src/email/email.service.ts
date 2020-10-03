@@ -53,7 +53,7 @@ export class EmailService {
     async validateEmail({email, redirect}) {
 
         // Get the pending email data
-        const pendingEmailData: PendingEmailData = await prisma.pendingemail.findOne({
+        const pendingEmailData: PendingEmailData = await prisma.pendingEmail.findOne({
             where: { email },
         });
 
@@ -79,7 +79,7 @@ export class EmailService {
         }
 
         // Delete pedning email
-        await prisma.pendingemail.delete({
+        await prisma.pendingEmail.delete({
             where: { email },
         });
 
