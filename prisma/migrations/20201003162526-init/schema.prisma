@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 model Answer {
@@ -12,14 +12,13 @@ model Answer {
   id                String @default(dbgenerated()) @id
   poll              String
   votes             Int?   @default(0)
-  pollId Poll   @relation(fields: [poll], references: [id])
 }
 
 model PendingEmail {
   answers String[]
   email   String   @id
   ip      String
-  created DateTime? @default(now())
+  created DateTime @default(now())
 }
 
 model Poll {
