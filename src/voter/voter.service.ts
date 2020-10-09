@@ -133,6 +133,7 @@ export class VoterService {
     createVoterWithEamil({email, ip, answers}) {
         return prisma.voter.create({
             data: {
+                id: uuidv4(),
                 ip,
                 answers: answers,
                 email,

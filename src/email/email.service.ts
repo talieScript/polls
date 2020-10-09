@@ -69,13 +69,12 @@ export class EmailService {
         if (!voter) {
             // Create voter
             voter = await this.voterService.createVoterWithEamil(pendingEmailData)
-            .catch(error => {
-                return null;
-            });
-        }
-
-        if (!voter) {
-            return false;
+                .catch(error => {
+                    return null;
+                });
+            if (!voter) {
+                return false;
+            }
         }
 
         // Delete pedning email
