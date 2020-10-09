@@ -1,8 +1,8 @@
 import { Injectable, forwardRef, Inject } from '@nestjs/common';
-import { Voter } from './interfaces/voter.interface';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, FindOneVoterArgs } from '@prisma/client';
 import { EmailService } from 'src/email/email.service';
 import { PollsService } from '../polls/polls.service';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
@@ -40,8 +40,11 @@ export class VoterService {
 
         const newVoter = await prisma.voter.create({
             data: {
+                id: uuidv4(),
                 ip: ipAddress,
-                answers: { set: answers },
+                answers: {
+                    connect: answers.map(answerId => ({ id: answerId })),
+                },
             },
         });
 
@@ -50,6 +53,11 @@ export class VoterService {
                 voters: { set: [...pollVoters.voters, newVoter.id] },
             },
             where: { id: pollId },
+        });
+
+        await this.pollService.castVote({
+            voterId: newVoter.id,
+            answers,
         });
 
         return {
@@ -63,17 +71,28 @@ export class VoterService {
         const pollVoters: {voters: string[]} = await prisma.poll.findOne({
             where: {id: pollId},
             select: { voters: true },
-        });
+        }) as {voters: string[]};
 
-        const voterWithEmail = await prisma.voter.findOne({
+        const currentVoter = await prisma.voter.findOne({
             where: {email},
         });
 
+        const voterIds: string[]  = pollVoters.voters;
+
+        if (voterIds.some(voter => voter ===  currentVoter.id)) {
+            return {
+                voterId: currentVoter.id,
+                message: 'Validation failed; Voter already voted on poll.',
+                validVote: false,
+            }
+        }
+
         // If no record of voter with that email then send email confirmation email.
-        if (!voterWithEmail) {
-            const pendingEmail = await prisma.pendingemail.findOne({
+        if (!currentVoter) {
+            const pendingEmail = await prisma.pendingEmail.findOne({
                 where: {email},
             });
+            // if this voter has already voted and the email is awaiting validation
             if (pendingEmail) {
                 return {
                     voterId: '',
@@ -81,7 +100,7 @@ export class VoterService {
                     validVote: false,
                 };
             }
-            await prisma.pendingemail.create({
+            await prisma.pendingEmail.create({
                 data: {
                     email,
                     answers: { set: answers },
@@ -99,12 +118,12 @@ export class VoterService {
         }
 
         await this.pollService.castVote({
-            voterId: voterWithEmail.id,
+            voterId: currentVoter.id,
             answers,
         });
 
         return {
-            voterId: voterWithEmail.id,
+            voterId: currentVoter.id,
             message: 'Voter found; Vote has been cast.',
             validVote: true,
         }
@@ -115,10 +134,14 @@ export class VoterService {
         return prisma.voter.create({
             data: {
                 ip,
-                answers: { set: answers },
+                answers: answers,
                 email,
             },
         });
+    }
+
+    async getVoter(findOptions: FindOneVoterArgs) {
+        return await prisma.voter.findOne(findOptions);
     }
 
 }

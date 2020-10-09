@@ -40,4 +40,8 @@ export interface Poll {
      * Pool id
      */
     id: string;
+    /**
+     * voter ids
+     */
+    voters: string[];
 }
