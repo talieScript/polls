@@ -57,7 +57,7 @@ export class PollsService {
      */
     async validateVote({voteData, pollId}) {
         const pollAnswers: Answer[] = await prisma.answer.findMany({
-            where: { poll: pollId },
+            where: { pollId: pollId },
         })
         .catch(error => {
             throw new HttpException({
@@ -141,7 +141,7 @@ export class PollsService {
             });
         }));
 
-        const pollId = await answersFromDatabase[0].poll;
+        const pollId = await answersFromDatabase[0].pollId;
 
         const poll = await prisma.poll.findOne({
             where: { id: pollId },

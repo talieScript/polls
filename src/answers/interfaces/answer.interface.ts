@@ -16,6 +16,6 @@ export interface Answer {
     /**
      * poll referance
      */
-    poll: string
+    pollId: string
 
 }
