@@ -161,4 +161,28 @@ export class PollsService {
             });
         }));
     }
+
+    async deletePoll(id, password) {
+        const poll = await prisma.poll.findOne({
+            where: { id },
+            select: { password: true }
+        });
+
+        // unhash password
+
+        if (password !== poll.password) {
+            throw new HttpException({
+                status: HttpStatus.NOT_ACCEPTABLE,
+                error: 'Incorrect delete password.'
+            }, 406);
+        }
+
+        // create poll specs table
+
+        return await prisma.poll.delete({
+            where: {
+                id
+              }
+        });
+    }
 }
