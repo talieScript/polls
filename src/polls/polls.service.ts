@@ -37,7 +37,7 @@ export class PollsService {
                 options,
                 created: dayjs().toISOString(),
                 end_date: endDate,
-                answers: {
+                Answer: {
                    create: answers.map((answer)  => ({
                                 id: uuidv4(),
                                 answer_string: answer,
