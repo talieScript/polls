@@ -35,4 +35,6 @@ export class CreatePollDto {
     @IsDateString()
     @Validate(ValidEndDate)
     readonly endDate: Date;
+    @IsString()
+    readonly password: string;
 }

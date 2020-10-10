@@ -34,7 +34,8 @@ model Poll {
   title    String
   voters   String[]
   voterId  String?
-  Answers   Answer[]
+  Answers  Answer[]
+  password String
 }
 
 model Voter {

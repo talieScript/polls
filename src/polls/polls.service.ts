@@ -28,7 +28,7 @@ export class PollsService {
 
         // TODO: put poll in a queue to be created
 
-        const { endDate, title, question, options, answers } = createPollData;
+        const { endDate, title, question, options, answers, password } = createPollData;
         const newPoll =  await prisma.poll.create({
             data: {
                 id: uuidv4(),
@@ -37,13 +37,14 @@ export class PollsService {
                 options,
                 created: dayjs().toISOString(),
                 end_date: endDate,
-                Answer: {
+                Answers: {
                    create: answers.map((answer)  => ({
                                 id: uuidv4(),
                                 answer_string: answer,
                             }),
                    ),
                 },
+                password,
             },
         });
         return newPoll;
