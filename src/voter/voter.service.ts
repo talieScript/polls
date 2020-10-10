@@ -100,6 +100,16 @@ export class VoterService {
                     validVote: false,
                 };
             }
+
+            // send email and check its been sent
+            await this.emailService.sendValidationEmail(email).catch(() => {
+                return {
+                    voterId: '',
+                    message: 'Internal Error: Email failed to send.',
+                    validVote: false,
+                };
+            });
+
             await prisma.pendingEmail.create({
                 data: {
                     email,
@@ -108,11 +118,9 @@ export class VoterService {
                 },
             });
 
-            this.emailService.sendValidationEmail(email);
-
             return {
                 voterId: '',
-                message: 'Validation passed; Varification email sent.',
+                message: 'Validation passed: Varification email sent.',
                 validVote: false,
             };
         }

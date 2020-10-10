@@ -21,33 +21,35 @@ export class EmailService {
             port: 465,
             secure: true, // use SSL
             auth: {
-                user: 'taliesin.bowes@zohomail.eu',
-                pass: '1Ginandtonic',
+                user: process.env.EMAIL_USERNAME,
+                pass: process.env.EMAIL_PASSWORD,
             },
         });
 
         const mailOptions = {
-            from: '"Easy Polls Varification" <taliesin.bowes@zohomail.eu>', // sender address (who sends)
-            to: email, // list of receivers (who receives)
-            subject: 'Varify email',
+            from: `"Easy Polls" <${process.env.EMAIL_USERNAME}>`,
+            to: email,
+            subject: 'Validate vote',
             html: `
                 <h4>cunt</h4>
-                <p>click this link to varifiy yuor email and validate your vote. <br>
-                <a>${process.env.URL}/email?email=${email}&redirect=${process.env.EMAIL_REDIRECT}</a>
+                <p>
+                    Click <a href="${process.env.URL}/email?email=${email}&redirect=${process.env.EMAIL_REDIRECT}">here</a> to varifiy your email and validate your vote.<br>
+                </p>
+                <p>
+                    Please do not reply to this email.
                 </p>
             `,
         };
 
         // send mail with defined transport object
-        transporter.sendMail(mailOptions, (error, info) => {
+        return transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
-                throw new HttpException({
-                    statusCode: 500,
-                    error,
-                }, 500);
+                console.log(error)
+                return error;
             }
+            console.log(info)
             return true;
-        });
+        })
     }
 
     async validateEmail({email, redirect}) {
