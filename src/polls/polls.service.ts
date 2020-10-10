@@ -55,8 +55,8 @@ export class PollsService {
      * @summary Votes on a poll and creates a voter if not already existent
      */
     async validateVote({voteData, pollId}) {
-        const pollAnswers: Answer[] = await prisma.answer.findMany({
-            where: { poll: pollId },
+        const pollAnswers = await prisma.answer.findMany({
+            where: { Poll: pollId },
         })
         .catch(error => {
             throw new HttpException({

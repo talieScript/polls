@@ -42,8 +42,8 @@ export class VoterService {
             data: {
                 id: uuidv4(),
                 ip: ipAddress,
-                answers: {
-                    connect: answers.map(answerId => ({ id: answerId })),
+                Answers: {
+                    set: answers.map(answerId => answerId),
                 },
             },
         });
@@ -139,12 +139,11 @@ export class VoterService {
     }
 
     createVoterWithEamil({email, ip, answers}) {
-        console.log('here')
         return prisma.voter.create({
             data: {
                 id: uuidv4(),
                 ip,
-                answers: { connect: answers.map(answerId => ({ id: answerId })) },
+                Answers: { set: answers.map(answerId => answerId) },
                 email,
             },
         });
