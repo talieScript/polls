@@ -8,13 +8,11 @@ datasource db {
 }
 
 model Answer {
-  answer_string String
-  id            String  @id
-  votes         Int?    @default(0)
-  pollId        String?
-  voterId       String?
-  Poll          Poll?   @relation(fields: [pollId], references: [id])
-  Voter         Voter?  @relation(fields: [voterId], references: [id])
+  answer_string     String
+  id                String  @id
+  votes             Int?    @default(0)
+  Poll              String?
+  Poll_AnswerToPoll Poll?   @relation(fields: [Poll], references: [id])
 }
 
 model PendingEmail {
@@ -33,7 +31,7 @@ model Poll {
   title    String
   voters   String[]
   voterId  String?
-  Answers  Answer[]
+  Answer   Answer[]
   password String
 }
 
@@ -41,5 +39,5 @@ model Voter {
   email   String?  @unique
   id      String   @id
   ip      String
-  answers Answer[]
+  Answers String[]
 }

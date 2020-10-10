@@ -42,8 +42,8 @@ export class VoterService {
             data: {
                 id: uuidv4(),
                 ip: ipAddress,
-                answers: {
-                    connect: answers.map(answerId => ({ id: answerId })),
+                Answers: {
+                    set: answers.map(answerId => answerId),
                 },
             },
         });
@@ -143,7 +143,7 @@ export class VoterService {
             data: {
                 id: uuidv4(),
                 ip,
-                answers: { connect: answers.map(answerId => ({ id: answerId })) },
+                Answers: { set: answers.map(answerId => answerId) },
                 email,
             },
         });
