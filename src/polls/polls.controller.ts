@@ -1,4 +1,4 @@
-import { Controller, Body, Post, Param, Delete  } from '@nestjs/common';
+import { Controller, Body, Post, Param, Delete, Query  } from '@nestjs/common';
 import { CreatePollDto } from './dto/CreatePoll.dto';
 import { VoteDto } from './dto/Vote.dto';
 import { ValidationPipe } from './pipes/polls.pipe';
@@ -20,8 +20,8 @@ export class PollsController {
     return validAndPollId;
   }
 
-  @Delete('/:pollId/:password')
-  async deletePoll(@Param('pollId') pollId: string, @Param('password') password: string) {
+  @Delete('/:pollId')
+  async deletePoll(@Param('pollId') pollId: string, @Query('password') password: string) {
     return await this.pollsService.deletePoll(pollId, password);
   }
 }
