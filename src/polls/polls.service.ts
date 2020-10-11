@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import { VoterService } from '../voter/voter.service';
+const hash = require('object-hash');
 
 const prisma = new PrismaClient();
 
@@ -29,6 +30,9 @@ export class PollsService {
         // TODO: put poll in a queue to be created
 
         const { endDate, title, question, options, answers, password } = createPollData;
+
+        const passwordHash = hash(password)
+
         const newPoll =  await prisma.poll.create({
             data: {
                 id: uuidv4(),
@@ -44,7 +48,7 @@ export class PollsService {
                             }),
                    ),
                 },
-                password,
+                password: passwordHash,
             },
         });
         return newPoll;
@@ -165,12 +169,18 @@ export class PollsService {
     async deletePoll(id, password) {
         const poll = await prisma.poll.findOne({
             where: { id },
-            select: { password: true }
         });
 
-        // unhash password
+        if (!poll) {
+            throw new HttpException({
+                status: HttpStatus.NOT_FOUND,
+                error: 'Id does not match any active polls.'
+            }, 406);
+        }
 
-        if (password !== poll.password) {
+        const passwordHash = hash(password);
+
+        if (passwordHash !== poll.password) {
             throw new HttpException({
                 status: HttpStatus.NOT_ACCEPTABLE,
                 error: 'Incorrect delete password.'
