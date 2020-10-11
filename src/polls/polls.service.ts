@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import { VoterService } from '../voter/voter.service';
+const hash = require('object-hash');
 
 const prisma = new PrismaClient();
 
@@ -28,7 +29,10 @@ export class PollsService {
 
         // TODO: put poll in a queue to be created
 
-        const { endDate, title, question, options, answers } = createPollData;
+        const { endDate, title, question, options, answers, password } = createPollData;
+
+        const passwordHash = hash(password)
+
         const newPoll =  await prisma.poll.create({
             data: {
                 id: uuidv4(),
@@ -44,6 +48,7 @@ export class PollsService {
                             }),
                    ),
                 },
+                password: passwordHash,
             },
         });
         return newPoll;
@@ -55,8 +60,8 @@ export class PollsService {
      * @summary Votes on a poll and creates a voter if not already existent
      */
     async validateVote({voteData, pollId}) {
-        const pollAnswers: Answer[] = await prisma.answer.findMany({
-            where: { poll: pollId },
+        const pollAnswers = await prisma.answer.findMany({
+            where: { Poll: pollId },
         })
         .catch(error => {
             throw new HttpException({
@@ -140,7 +145,7 @@ export class PollsService {
             });
         }));
 
-        const pollId = await answersFromDatabase[0].poll;
+        const pollId = await answersFromDatabase[0].pollId;
 
         const poll = await prisma.poll.findOne({
             where: { id: pollId },
@@ -159,5 +164,35 @@ export class PollsService {
                 data: { votes: answer.votes + 1 },
             });
         }));
+    }
+
+    async deletePoll(id, password) {
+        const poll = await prisma.poll.findOne({
+            where: { id },
+        });
+
+        if (!poll) {
+            throw new HttpException({
+                status: HttpStatus.NOT_FOUND,
+                error: 'Id does not match any active polls.'
+            }, 406);
+        }
+
+        const passwordHash = hash(password);
+
+        if (passwordHash !== poll.password) {
+            throw new HttpException({
+                status: HttpStatus.NOT_ACCEPTABLE,
+                error: 'Incorrect delete password.'
+            }, 406);
+        }
+
+        // create poll specs table
+
+        return await prisma.poll.delete({
+            where: {
+                id
+              }
+        });
     }
 }

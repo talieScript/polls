@@ -4,15 +4,17 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 model Answer {
-  answer_string     String
-  id                String  @id
-  votes             Int?    @default(0)
-  Poll              String?
-  Poll_AnswerToPoll Poll?   @relation(fields: [Poll], references: [id])
+  answer_string String
+  id            String  @id
+  votes         Int?    @default(0)
+  pollId        String?
+  voterId       String?
+  Poll          Poll?   @relation(fields: [pollId], references: [id])
+  Voter         Voter?  @relation(fields: [voterId], references: [id])
 }
 
 model PendingEmail {
@@ -31,7 +33,7 @@ model Poll {
   title    String
   voters   String[]
   voterId  String?
-  Answer   Answer[]
+  Answers  Answer[]
   password String
 }
 
@@ -39,5 +41,5 @@ model Voter {
   email   String?  @unique
   id      String   @id
   ip      String
-  Answers String[]
+  answers Answer[]
 }
