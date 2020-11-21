@@ -9,9 +9,9 @@ export class PollsController {
   constructor(private readonly pollsService: PollsService) { }
 
   @Post()
-  async createPoll(@Body(new ValidationPipe()) createPollDto: CreatePollDto) {
-      const createdPoll = await this.pollsService.createPoll(createPollDto);
-      return createdPoll;
+  async createPoll(@Body() createPollDto: CreatePollDto) {
+    const createdPoll = await this.pollsService.createPoll(createPollDto);
+    return createdPoll;
   }
 
   @Post('/:pollId')

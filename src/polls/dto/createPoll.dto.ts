@@ -28,13 +28,14 @@ export class CreatePollDto {
      /**
      * TODO: Add better validation for options.
      */
-    @IsObject()
+    @IsString()
     @IsOptional()
-    readonly options: Options;
+    readonly options: string;
     // ios string
     @IsDateString()
-    @Validate(ValidEndDate)
     readonly endDate: Date;
+    @IsString()
+    readonly visibility: string
     @IsString()
     readonly password: string;
 }
