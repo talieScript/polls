@@ -23,7 +23,7 @@ export class PollsService {
         if (!createPollData.options) {
             createPollData.options = '{"choiceNoStrict": false, "validateEmail": false, "validateIp": true, "choiceNo": 1}';
         } else {
-            createPollData.options = JSON.stringify(createPollData.options);
+            createPollData.options = `${JSON.stringify(createPollData.options)}`;
         }
 
         // TODO: put poll in a queue to be created
