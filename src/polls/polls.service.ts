@@ -1,4 +1,4 @@
-import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
+import { Injectable, HttpStatus, HttpException, Delete } from '@nestjs/common';
 import { Poll, Options } from './interfaces/poll.interface';
 import { Answer } from '../answers/interfaces/answer.interface';
 import { PrismaClient } from '@prisma/client';
@@ -20,16 +20,15 @@ export class PollsService {
      * @summary Creates a new poll and returns newly created poll json.
      */
     async createPoll(createPollData) {
-
         if (!createPollData.options) {
             createPollData.options = '{"choiceNoStrict": false, "validateEmail": false, "validateIp": true, "choiceNo": 1}';
         } else {
-            createPollData.options = JSON.stringify(createPollData.options);
+            createPollData.options = `${JSON.stringify(createPollData.options)}`;
         }
 
         // TODO: put poll in a queue to be created
 
-        const { endDate, title, question, options, answers, password } = createPollData;
+        const { endDate, title, question, options, answers, visibility, password } = createPollData;
 
         const passwordHash = hash(password)
 
@@ -49,8 +48,10 @@ export class PollsService {
                    ),
                 },
                 password: passwordHash,
+                visibility,
             },
         });
+        Delete(newPoll.password)
         return newPoll;
     }
 

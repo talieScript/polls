@@ -23,16 +23,17 @@ model PendingEmail {
 }
 
 model Poll {
-  created  DateTime? @default(now())
-  end_date DateTime
-  id       String    @id
-  options  String
-  question String
-  title    String
-  voters   String[]
-  voterId  String?
-  Answer   Answer[]
-  password String
+  created    DateTime? @default(now())
+  end_date   DateTime
+  id         String    @id
+  options    String
+  question   String
+  title      String
+  voters     String[]
+  voterId    String?
+  Answer     Answer[]
+  visibility String
+  password   String
 }
 
 model Voter {
