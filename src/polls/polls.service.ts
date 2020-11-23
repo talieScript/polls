@@ -14,6 +14,20 @@ export class PollsService {
     constructor(
         private readonly voterService: VoterService,
     ) {}
+    
+    async findOne(pollId: string): Promise<Poll> {
+        debugger;
+        const poll = await prisma.poll.findOne({ 
+            where: {
+                id: pollId
+            },
+            include: {
+                Answer: true
+            }
+        })
+        return  poll;
+    }
+
     /**
      *
      * @param createPollData

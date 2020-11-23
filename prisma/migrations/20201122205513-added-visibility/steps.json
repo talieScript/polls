@@ -1,0 +1,102 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateField",
+      "model": "Answer",
+      "field": "Poll_AnswerToPoll",
+      "type": "Poll",
+      "arity": "Optional"
+    },
+    {
+      "tag": "CreateDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Answer",
+          "field": "Poll_AnswerToPoll"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Answer",
+          "field": "Poll_AnswerToPoll"
+        },
+        "directive": "relation"
+      },
+      "argument": "fields",
+      "value": "[Poll]"
+    },
+    {
+      "tag": "CreateArgument",
+      "location": {
+        "tag": "Directive",
+        "path": {
+          "tag": "Field",
+          "model": "Answer",
+          "field": "Poll_AnswerToPoll"
+        },
+        "directive": "relation"
+      },
+      "argument": "references",
+      "value": "[id]"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Answer",
+      "field": "pollId"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Answer",
+      "field": "voterId"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Answer",
+      "field": "Voter"
+    },
+    {
+      "tag": "UpdateField",
+      "model": "Answer",
+      "field": "Poll",
+      "type": "String"
+    },
+    {
+      "tag": "DeleteDirective",
+      "location": {
+        "path": {
+          "tag": "Field",
+          "model": "Answer",
+          "field": "Poll"
+        },
+        "directive": "relation"
+      }
+    },
+    {
+      "tag": "CreateField",
+      "model": "Poll",
+      "field": "visibility",
+      "type": "String",
+      "arity": "Required"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Voter",
+      "field": "Answers",
+      "type": "String",
+      "arity": "List"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Voter",
+      "field": "answers"
+    }
+  ]
+}
