@@ -23,7 +23,7 @@ export class PollsController {
   @Post()
   async createPoll(@Body() createPollDto: CreatePollDto) {
     const createdPoll = await this.pollsService.createPoll(createPollDto);
-    return createdPoll;
+    return createdPoll.id;
   }
 
   @Post('/:pollId')
