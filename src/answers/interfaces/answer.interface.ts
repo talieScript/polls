@@ -1,6 +1,7 @@
 import { Poll } from "src/polls/interfaces/poll.interface";
 
 export interface Answer {
+    Poll: any;
     /**
      * The actual answer in a string
      */
@@ -13,9 +14,5 @@ export interface Answer {
      * id
      */
     id: string;
-    /**
-     * poll referance
-     */
-    pollId: string
 
 }

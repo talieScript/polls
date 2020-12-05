@@ -79,7 +79,7 @@ export class EmailService {
             }
         }
 
-        // Delete pedning email
+        // Delete pending email
         await prisma.pendingEmail.delete({
             where: { email },
         });

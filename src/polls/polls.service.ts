@@ -98,7 +98,7 @@ export class PollsService {
         });
 
         // Get poll and parse poll options
-        const pollData: { options: string } = await prisma.poll.findOne({
+        const pollData: { options: string, voters: string[] } = await prisma.poll.findOne({
             where: {id: pollId},
             select: {options: true, voters: true},
         });
@@ -132,16 +132,6 @@ export class PollsService {
             }
         }
 
-        if (parsedOptions.validateIp) {
-            // get all ip of all the voters on this poll
-            const voterIps = prisma.voter.findMany({
-                where: { 
-
-                }
-            })
-            // check if ip is in poll voter ips
-        }
-
         const { ipAddress, answers, email } = voteData;
 
         const voterValidationResponse = parsedOptions.validateEmail
@@ -160,7 +150,7 @@ export class PollsService {
             });
         }));
 
-        const pollId = await answersFromDatabase[0].pollId;
+        const pollId = await answersFromDatabase[0].Poll;
 
         const poll = await prisma.poll.findOne({
             where: { id: pollId },
