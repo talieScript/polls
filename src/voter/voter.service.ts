@@ -7,6 +7,10 @@ import { VoteStatusRes } from '../polls/interfaces/voteStatusResponce.interface'
 
 const prisma = new PrismaClient();
 
+interface VoteValidationRrturn extends VoteStatusRes {
+    passed: boolean
+}
+
 @Injectable()
 export class VoterService {
     constructor(
@@ -16,7 +20,7 @@ export class VoterService {
         private readonly pollService: PollsService,
     ) {}
 
-    async voterValidationNoEmail({ipAddress, answers, pollId}): Promise<VoteStatusRes> {
+    async voterValidationNoEmail({ipAddress, answers, pollId}): Promise<VoteValidationRrturn> {
         const pollVoters: {voters: string[]} = await prisma.poll.findOne({
             where: {id: pollId},
             select: { voters: true },
@@ -34,7 +38,8 @@ export class VoterService {
         if (pollVoterId) {
             return {
                 voterId: pollVoterId,
-                voteStatus: 'alreadyVoted'
+                voteStatus: 'alreadyVoted',
+                passed: false,
             };
         }
 
@@ -62,11 +67,12 @@ export class VoterService {
 
         return {
             voterId: newVoter.id,
-            voteStatus: 'votePassed'
+            voteStatus: 'votePassed',
+            passed: true
         };
     }
 
-    async voterValidationWithEmail({email, ipAddress, answers, pollId}): Promise<VoteStatusRes> {
+    async voterValidationWithEmail({email, ipAddress, answers, pollId}): Promise<VoteValidationRrturn> {
         const pollVoters: {voters: string[]} = await prisma.poll.findOne({
             where: {id: pollId},
             select: { voters: true },
@@ -81,7 +87,8 @@ export class VoterService {
         if (voterIds.some(voter => voter ===  currentVoter.id)) {
             return {
                 voterId: currentVoter.id,
-                voteStatus: 'alreadyVoted'
+                voteStatus: 'alreadyVoted',
+                passed: false
             }
         }
 
@@ -94,7 +101,8 @@ export class VoterService {
             if (pendingEmail) {
                 return {
                     voterId: '',
-                    voteStatus: 'emailPending'
+                    voteStatus: 'emailPending',
+                    passed: false
                 };
             }
 
@@ -102,8 +110,9 @@ export class VoterService {
             await this.emailService.sendValidationEmail(email).catch(() => {
                 return {
                     voterId: '',
-                    voteStatus: 'emailError'
-                };
+                    voteStatus: 'emailError',
+                    passed: false
+                }
             });
 
             await prisma.pendingEmail.create({
@@ -116,7 +125,8 @@ export class VoterService {
 
             return {
                 voterId: '',
-                voteStatus: 'emailSent'
+                voteStatus: 'emailSent',
+                passed: false
             };
         }
 
@@ -127,7 +137,8 @@ export class VoterService {
 
         return {
             voterId: currentVoter.id,
-            voteStatus: 'votePassed'
+            voteStatus: 'votePassed',
+            passed: true
         }
 
     }

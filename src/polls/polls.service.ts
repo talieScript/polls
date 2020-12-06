@@ -135,10 +135,19 @@ export class PollsService {
 
         const { ipAddress, answers, email } = voteData;
 
-        const voterValidationResponse = parsedOptions.validateEmail
-            ? await this.voterService.voterValidationWithEmail({email, ipAddress, answers, pollId})
-            : await this.voterService.voterValidationNoEmail({ipAddress, answers, pollId});;
+        let voterValidationResponse = { passed: true };
 
+        // check email first
+        if(parsedOptions.validateEmail) {
+            voterValidationResponse = await this.voterService.voterValidationWithEmail({email, ipAddress, answers, pollId})
+        }
+
+        // If email passed we still might have to check the ip address but dont check if email validation has failed already
+        if (parsedOptions.validateIp && voterValidationResponse.passed) {
+            voterValidationResponse = await this.voterService.voterValidationNoEmail({ipAddress, answers, pollId})
+        }
+
+        delete voterValidationResponse.passed
         return voterValidationResponse;
     }
 
