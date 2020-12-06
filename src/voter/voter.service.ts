@@ -147,4 +147,16 @@ export class VoterService {
         return await prisma.voter.findOne(findOptions);
     }
 
+    async getAnswersForPoll({voterId, pollId}) {
+        // get poll answers
+        const pollAnswers = await this.pollService.getAnswers(pollId);
+        // get voter answers in poll
+        const voterAnswers = await prisma.voter.findOne({
+            where: { id: voterId },
+            select: { Answers: true }
+        })
+        const pollAnswerIds = pollAnswers.Answer.map(a => a.id)
+        return voterAnswers.Answers.filter(voterAnswer => pollAnswerIds.indexOf(voterAnswer) + 1)
+    }
+
 }
