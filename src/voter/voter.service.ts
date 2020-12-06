@@ -3,6 +3,7 @@ import { PrismaClient, FindOneVoterArgs } from '@prisma/client';
 import { EmailService } from 'src/email/email.service';
 import { PollsService } from '../polls/polls.service';
 import { v4 as uuidv4 } from 'uuid';
+import { VoteStatusRes } from '../polls/interfaces/voteStatusResponce.interface'
 
 const prisma = new PrismaClient();
 
@@ -15,7 +16,7 @@ export class VoterService {
         private readonly pollService: PollsService,
     ) {}
 
-    async voterValidationNoEmail({ipAddress, answers, pollId}): Promise<{voterId: string, message: string, validVote: boolean}> {
+    async voterValidationNoEmail({ipAddress, answers, pollId}): Promise<VoteStatusRes> {
         const pollVoters: {voters: string[]} = await prisma.poll.findOne({
             where: {id: pollId},
             select: { voters: true },
@@ -33,8 +34,7 @@ export class VoterService {
         if (pollVoterId) {
             return {
                 voterId: pollVoterId,
-                message: 'Validation failed; has already voted on poll.',
-                validVote: false,
+                voteStatus: 'alreadyVoted'
             };
         }
 
@@ -62,12 +62,11 @@ export class VoterService {
 
         return {
             voterId: newVoter.id,
-            message: 'Validation passed; Created new voter in database.',
-            validVote: true,
+            voteStatus: 'votePassed'
         };
     }
 
-    async voterValidationWithEmail({email, ipAddress, answers, pollId}): Promise<{voterId: string, message: string, validVote: boolean}> {
+    async voterValidationWithEmail({email, ipAddress, answers, pollId}): Promise<VoteStatusRes> {
         const pollVoters: {voters: string[]} = await prisma.poll.findOne({
             where: {id: pollId},
             select: { voters: true },
@@ -82,8 +81,7 @@ export class VoterService {
         if (voterIds.some(voter => voter ===  currentVoter.id)) {
             return {
                 voterId: currentVoter.id,
-                message: 'Validation failed; Voter already voted on poll.',
-                validVote: false,
+                voteStatus: 'alreadyVoted'
             }
         }
 
@@ -96,8 +94,7 @@ export class VoterService {
             if (pendingEmail) {
                 return {
                     voterId: '',
-                    message: 'Email pending verification.',
-                    validVote: false,
+                    voteStatus: 'emailPending'
                 };
             }
 
@@ -105,8 +102,7 @@ export class VoterService {
             await this.emailService.sendValidationEmail(email).catch(() => {
                 return {
                     voterId: '',
-                    message: 'Internal Error: Email failed to send.',
-                    validVote: false,
+                    voteStatus: 'emailError'
                 };
             });
 
@@ -120,8 +116,7 @@ export class VoterService {
 
             return {
                 voterId: '',
-                message: 'Validation passed: Varification email sent.',
-                validVote: false,
+                voteStatus: 'emailSent'
             };
         }
 
@@ -132,8 +127,7 @@ export class VoterService {
 
         return {
             voterId: currentVoter.id,
-            message: 'Voter found; Vote has been cast.',
-            validVote: true,
+            voteStatus: 'votePassed'
         }
 
     }

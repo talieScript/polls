@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import { VoterService } from '../voter/voter.service';
+import { VoteStatusRes } from './interfaces/voteStatusResponce.interface'
 const hash = require('object-hash');
 
 const prisma = new PrismaClient();
@@ -74,7 +75,7 @@ export class PollsService {
      * @param voteData
      * @summary Votes on a poll and creates a voter if not already existent
      */
-    async validateVote({voteData, pollId}) {
+    async validateVote({voteData, pollId}): Promise<VoteStatusRes> {
         const pollAnswers = await prisma.answer.findMany({
             where: { Poll: pollId },
         })
