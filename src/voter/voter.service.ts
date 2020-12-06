@@ -20,7 +20,7 @@ export class VoterService {
         private readonly pollService: PollsService,
     ) {}
 
-    async voterValidationNoEmail({ipAddress, answers, pollId}): Promise<VoteValidationRrturn> {
+    async voterValidationWithIp({ipAddress, answers, pollId}): Promise<VoteValidationRrturn> {
         const pollVoters: {voters: string[]} = await prisma.poll.findOne({
             where: {id: pollId},
             select: { voters: true },
@@ -84,7 +84,7 @@ export class VoterService {
 
         const voterIds: string[]  = pollVoters.voters;
 
-        if (voterIds.some(voter => voter ===  currentVoter.id)) {
+        if (currentVoter && voterIds.some(voter => voter ===  currentVoter.id)) {
             return {
                 voterId: currentVoter.id,
                 voteStatus: 'alreadyVoted',
