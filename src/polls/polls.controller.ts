@@ -1,6 +1,5 @@
 import { Controller, Body, Post, Param, Delete, Query, Get, HttpException, HttpStatus  } from '@nestjs/common';
 import { CreatePollDto } from './dto/CreatePoll.dto';
-import { CheckVotedDto } from './dto/checkVoted.dto';
 import { VoteDto } from './dto/Vote.dto';
 import { ValidationPipe } from './pipes/polls.pipe';
 import { PollsService } from './polls.service';
@@ -15,11 +14,11 @@ export class PollsController {
   @Get('/:pollId')
   async getPoll(
     @Param('pollId') pollId: string,
-    @Param('ip') ip: string,
-    @Param('email') email: string,
+    @Query('ip') ip: string,
+    @Query('email') email: string,
   ): Promise<Poll> {
     // if not given an ip or email just get the poll
-    const poll = !(ip || email) 
+    const poll = !ip || !email 
       ? await this.pollsService.findOne(pollId) 
       : await this.pollsService.findOneWithUserDetails({ip, email, pollId})
 
