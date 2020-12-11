@@ -5,7 +5,6 @@ import { ValidationPipe } from './pipes/polls.pipe';
 import { PollsService } from './polls.service';
 import { Poll } from './interfaces/poll.interface'
 import { VoteStatusRes } from './interfaces/voteStatusResponce.interface'
-import { Answer } from '../answers/interfaces/answer.interface';
 
 @Controller('polls')
 export class PollsController {
@@ -16,19 +15,11 @@ export class PollsController {
     @Param('pollId') pollId: string,
     @Query('ip') ip: string,
     @Query('email') email: string,
-  ): Promise<Poll> {
+  ): Promise<Poll | { poll: Poll, userAnswers: string[]}> {
     // if not given an ip or email just get the poll
-    const poll = !ip || !email 
+    return !ip || !email 
       ? await this.pollsService.findOne(pollId) 
       : await this.pollsService.findOneWithUserDetails({ip, email, pollId})
-
-    if (!poll) {
-      throw new HttpException({
-        status: HttpStatus.NOT_FOUND,
-      }, 404);
-    }
-
-    return poll
   }
 
   @Post()

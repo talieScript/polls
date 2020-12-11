@@ -25,6 +25,11 @@ export class PollsService {
                 Answer: true
             }
         })
+        if (!poll) {
+            throw new HttpException({
+                status: HttpStatus.NOT_FOUND,
+            }, 404);
+        }
         return  poll;
     }
     
@@ -44,11 +49,48 @@ export class PollsService {
         
         const pollOptions = JSON.parse(poll.options)
 
-        let userAnswers: Answer[] = []
+        let userAnswers: string[] = []
         if (pollOptions.validateIp) {
-            const pollVoters = poll.voters
-        console.log({pollVoters})
-            // userAnswers = 
+            if (!ip) {
+                throw new HttpException({
+                    status: HttpStatus.NOT_ACCEPTABLE,
+                    error: 'Must provide ip.'
+                }, 406);
+            }
+            const pollVoterWithIp = await prisma.voter.findMany({
+                where: {
+                    id: {
+                        in: poll.voters
+                    },
+                    ip
+                }
+            })
+            const pollAnswerIds = poll.Answer.map(a => a.id)
+            userAnswers = pollVoterWithIp[0].Answers.filter(answer => pollAnswerIds.indexOf(answer) + 1)
+        } else {
+            if (!email) {
+                throw new HttpException({
+                    status: HttpStatus.NOT_ACCEPTABLE,
+                    error: 'Must provide email.'
+                }, 406);
+            }
+            const pollVoterWithEmail = await prisma.voter.findMany({
+                where: {
+                    id: {
+                        in: poll.voters
+                    },
+                    email
+                }
+            })
+
+            const pollAnswerIds = poll.Answer.map(a => a.id)
+            userAnswers = pollVoterWithEmail[0].Answers.filter(answer => pollAnswerIds.indexOf(answer) + 1)
+
+            return {
+                poll,
+                userAnswers,
+            }
+
         }
     }
 
