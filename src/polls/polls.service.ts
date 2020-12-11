@@ -85,12 +85,11 @@ export class PollsService {
 
             const pollAnswerIds = poll.Answer.map(a => a.id)
             userAnswers = pollVoterWithEmail[0].Answers.filter(answer => pollAnswerIds.indexOf(answer) + 1)
+        }
 
-            return {
-                poll,
-                userAnswers,
-            }
-
+        return {
+            poll,
+            userAnswers,
         }
     }
 

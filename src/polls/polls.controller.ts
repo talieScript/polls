@@ -17,7 +17,7 @@ export class PollsController {
     @Query('email') email: string,
   ): Promise<Poll | { poll: Poll, userAnswers: string[]}> {
     // if not given an ip or email just get the poll
-    return !ip || !email 
+    return !ip && !email 
       ? await this.pollsService.findOne(pollId) 
       : await this.pollsService.findOneWithUserDetails({ip, email, pollId})
   }
