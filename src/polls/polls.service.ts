@@ -17,7 +17,6 @@ export class PollsService {
     ) {}
     
     async findOne(pollId: string): Promise<Poll> {
-        debugger;
         const poll = await prisma.poll.findOne({ 
             where: {
                 id: pollId
@@ -27,6 +26,30 @@ export class PollsService {
             }
         })
         return  poll;
+    }
+    
+    /**
+     * find a poll and 
+     */
+    async findOneWithUserDetails({ email, ip, pollId }) {
+        if (!email && !ip) {
+            throw new HttpException({
+                status: HttpStatus.NOT_ACCEPTABLE,
+                error: 'Must provide email or ip.'
+            }, 406);
+        }
+
+        // get the poll
+        const poll = await this.findOne(pollId)
+        
+        const pollOptions = JSON.parse(poll.options)
+
+        let userAnswers: Answer[] = []
+        if (pollOptions.validateIp) {
+            const pollVoters = poll.voters
+        console.log({pollVoters})
+            // userAnswers = 
+        }
     }
 
     /**
@@ -215,4 +238,5 @@ export class PollsService {
             select: { Answer: true }
         })
     }
+
 }
