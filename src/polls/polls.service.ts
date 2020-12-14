@@ -46,16 +46,13 @@ export class PollsService {
 
         // get the poll
         const poll = await this.findOne(pollId)
-        
+
         const pollOptions = JSON.parse(poll.options)
 
         let userAnswers: string[] = []
         if (pollOptions.validateIp) {
             if (!ip) {
-                throw new HttpException({
-                    status: HttpStatus.NOT_ACCEPTABLE,
-                    error: 'Must provide ip.'
-                }, 406);
+                return poll
             }
             const pollVoterWithIp = await prisma.voter.findMany({
                 where: {
@@ -69,10 +66,7 @@ export class PollsService {
             userAnswers = pollVoterWithIp[0].Answers.filter(answer => pollAnswerIds.indexOf(answer) + 1)
         } else {
             if (!email) {
-                throw new HttpException({
-                    status: HttpStatus.NOT_ACCEPTABLE,
-                    error: 'Must provide email.'
-                }, 406);
+                return poll
             }
             const pollVoterWithEmail = await prisma.voter.findMany({
                 where: {

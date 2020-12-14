@@ -16,10 +16,13 @@ export class PollsController {
     @Query('ip') ip: string,
     @Query('email') email: string,
   ): Promise<Poll | { poll: Poll, userAnswers: string[]}> {
+
     // if not given an ip or email just get the poll
-    return !ip && !email 
+    const polldata = !ip && !email 
       ? await this.pollsService.findOne(pollId) 
       : await this.pollsService.findOneWithUserDetails({ip, email, pollId})
+
+      return polldata
   }
 
   @Post()
