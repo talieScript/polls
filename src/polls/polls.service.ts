@@ -22,7 +22,7 @@ export class PollsService {
                 id: pollId
             },
             include: {
-                Answer: true
+                Answers: true
             }
         })
         if (!poll) {
@@ -62,7 +62,10 @@ export class PollsService {
                     ip
                 }
             })
-            const pollAnswerIds = poll.Answer.map(a => a.id)
+            if (!pollVoterWithIp.length) {
+                return poll
+            }
+            const pollAnswerIds = poll.Answers.map(a => a.id)
             userAnswers = pollVoterWithIp[0].Answers.filter(answer => pollAnswerIds.indexOf(answer) + 1)
         } else {
             if (!email) {
@@ -77,7 +80,7 @@ export class PollsService {
                 }
             })
 
-            const pollAnswerIds = poll.Answer.map(a => a.id)
+            const pollAnswerIds = poll.Answers.map(a => a.id)
             userAnswers = pollVoterWithEmail[0].Answers.filter(answer => pollAnswerIds.indexOf(answer) + 1)
         }
 
@@ -99,30 +102,34 @@ export class PollsService {
             createPollData.options = `${JSON.stringify(createPollData.options)}`;
         }
 
-        // TODO: put poll in a queue to be created
-
         const { endDate, title, question, options, answers, visibility, password } = createPollData;
 
         const passwordHash = hash(password)
 
-        const newPoll =  await prisma.poll.create({
-            data: {
-                id: uuidv4(),
-                title,
-                question,
-                options,
-                created: dayjs().toISOString(),
-                end_date: endDate,
-                Answer: {
-                   create: answers.map((answer)  => ({
-                                id: uuidv4(),
-                                answer_string: answer,
-                            }),
-                   ),
-                },
-                password: passwordHash,
-                visibility,
+        const pollData = {
+            id: uuidv4(),
+            title,
+            question,
+            options,
+            created: dayjs().toISOString(),
+            end_date: endDate,
+            Answers: {
+               create: answers.map((answer)  => ({
+                            id: uuidv4(),
+                            answer_string: answer,
+                        }),
+               ),
             },
+            password: passwordHash,
+            visibility,
+        }
+
+        if (!endDate.length) {
+            delete pollData.end_date
+        }
+
+        const newPoll =  await prisma.poll.create({
+            data: pollData,
         });
         Delete(newPoll.password)
         return newPoll;
@@ -270,7 +277,7 @@ export class PollsService {
     async getAnswers(pollId) {
         return await prisma.poll.findOne({
             where: { id: pollId },
-            select: { Answer: true }
+            select: { Answers: true }
         })
     }
 

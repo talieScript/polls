@@ -1,0 +1,11 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "UpdateField",
+      "model": "Poll",
+      "field": "end_date",
+      "arity": "Optional"
+    }
+  ]
+}

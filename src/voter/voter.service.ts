@@ -166,7 +166,7 @@ export class VoterService {
             where: { id: voterId },
             select: { Answers: true }
         })
-        const pollAnswerIds = pollAnswers.Answer.map(a => a.id)
+        const pollAnswerIds = pollAnswers.Answers.map(a => a.id)
         return voterAnswers.Answers.filter(voterAnswer => pollAnswerIds.indexOf(voterAnswer) + 1)
     }
 

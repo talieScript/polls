@@ -16,7 +16,7 @@ export interface Options {
 }
 
 export interface Poll {
-    Answer: Answer[]
+    Answers: Answer[]
     /**
      * The poll name
      */
