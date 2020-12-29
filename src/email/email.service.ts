@@ -52,7 +52,7 @@ export class EmailService {
         })
     }
 
-    async validateEmail({email, redirect}) {
+    async validateEmail(email) {
 
         // Get the pending email data
         const pendingEmailData: PendingEmailData = await prisma.pendingEmail.findOne({
@@ -90,5 +90,22 @@ export class EmailService {
         });
 
         return true;
+    }
+
+    async resend(email) {
+        const pendingEmail = await prisma.pendingEmail.findOne({
+            where: {
+                email
+            }
+        });
+
+        if(!pendingEmail) {
+            throw new HttpException({
+                status: HttpStatus.NOT_FOUND,
+                error: 'Pending email not found'
+            }, 404);
+        }
+
+        this.validateEmail(email)
     }
 }
