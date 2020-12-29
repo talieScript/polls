@@ -54,19 +54,29 @@ export class PollsService {
             if (!ip) {
                 return poll
             }
-            const pollVoterWithIp = await prisma.voter.findMany({
-                where: {
-                    id: {
-                        in: poll.voters
-                    },
-                    ip
-                }
-            })
-            if (!pollVoterWithIp.length) {
+
+            const votersWithIp = await prisma.voter.findMany({
+                where: {ip},
+            });
+    
+            // checks if voter has already voted on poll
+            const pollVoterId = poll.voters.find(pollVoter => {
+                return votersWithIp.some(voter => voter.id === pollVoter);
+            });
+
+            if (!pollVoterId) {
                 return poll
             }
+
+            // If there is a voter then they have already voted
+            const voter = await prisma.voter.findOne({
+                where: {
+                    id: pollVoterId
+                }
+            })
+
             const pollAnswerIds = poll.Answers.map(a => a.id)
-            userAnswers = pollVoterWithIp[0].Answers.filter(answer => pollAnswerIds.indexOf(answer) + 1)
+            userAnswers = voter.Answers.filter(answer => pollAnswerIds.indexOf(answer) + 1)
         } else {
             if (!email) {
                 return poll
