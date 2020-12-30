@@ -18,6 +18,6 @@ export class EmailController {
 
     @Post('/resend')
     async resendEmail(@Body() body: { email: string }) {
-        this.emailService.resend(body.email)
+        return await this.emailService.resend(body.email)
     }
 }

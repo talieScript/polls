@@ -106,6 +106,6 @@ export class EmailService {
             }, 404);
         }
 
-        this.validateEmail(email)
+        this.sendValidationEmail(email)
     }
 }
