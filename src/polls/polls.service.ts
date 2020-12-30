@@ -240,6 +240,27 @@ export class PollsService {
             select: { voters: true },
         });
 
+        const voter = await prisma.voter.findOne({
+            where: {
+                id: voterId
+            },
+            select: {
+                Answers: true
+            }
+        })
+
+        debugger;
+
+        //add answers to voter
+        await prisma.voter.update({
+            where: {
+                id: voterId
+            },
+            data: {
+                Answers: { set: [...voter.Answers, ...answers]}
+            }
+        })
+
         // add voter to poll
         await prisma.poll.update({
             where: { id: pollId },
