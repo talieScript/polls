@@ -5,6 +5,7 @@ import { ValidationPipe } from './pipes/polls.pipe';
 import { PollsService } from './polls.service';
 import { Poll } from './interfaces/poll.interface'
 import { VoteStatusRes } from './interfaces/voteStatusResponce.interface'
+import { Answer } from '../answers/interfaces/answer.interface'
 
 @Controller('polls')
 export class PollsController {
@@ -35,6 +36,11 @@ export class PollsController {
   async vote(@Param('pollId') pollId: string, @Body(new ValidationPipe()) voteData: VoteDto): Promise<VoteStatusRes> {
     const validAndPollId = await this.pollsService.validateVote({voteData, pollId});
     return validAndPollId;
+  }
+
+  @Get('/:pollId/answers')
+  async getAnswers(@Param('pollId') pollId: string): Promise<Answer[]> {
+    return (await this.pollsService.getAnswers(pollId)).Answers;
   }
 
   @Delete('/:pollId')
