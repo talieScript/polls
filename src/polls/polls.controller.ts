@@ -33,8 +33,9 @@ export class PollsController {
   }
 
   @Post('/:pollId')
-  async vote(@Param('pollId') pollId: string, @Body(new ValidationPipe()) voteData: VoteDto): Promise<VoteStatusRes> {
-    const validAndPollId = await this.pollsService.validateVote({voteData, pollId});
+  async vote(@Param('pollId') pollId: string, @Query('validateEmail') validateEmail: string, @Body(new ValidationPipe()) voteData: VoteDto): Promise<VoteStatusRes> {
+    const validateEmailBoolean = validateEmail === 'true' ? true : false
+    const validAndPollId = await this.pollsService.validateVote({voteData, pollId, validateEmail: validateEmailBoolean});
     return validAndPollId;
   }
 

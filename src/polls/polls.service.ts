@@ -155,7 +155,7 @@ export class PollsService {
      * @param voteData
      * @summary Votes on a poll and creates a voter if not already existent
      */
-    async validateVote({voteData, pollId}): Promise<VoteStatusRes> {
+    async validateVote({voteData, pollId, validateEmail}): Promise<VoteStatusRes> {
         const pollAnswers = await prisma.answer.findMany({
             where: { Poll: pollId },
         })
@@ -221,8 +221,10 @@ export class PollsService {
             voterValidationResponse = await this.voterService.voterValidationWithIp({ipAddress, answers, pollId})
         }
 
+        console.log(typeof validateEmail)
+
         if(parsedOptions.validateEmail && voterValidationResponse.passed) {
-            voterValidationResponse = await this.voterService.voterValidationWithEmail({email, ipAddress, answers, pollId})
+            voterValidationResponse = await this.voterService.voterValidationWithEmail({email, ipAddress, answers, pollId, validateEmail})
         }       
 
         delete voterValidationResponse.passed
