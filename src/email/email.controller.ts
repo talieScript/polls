@@ -11,9 +11,9 @@ export class EmailController {
     async validateEmail(@Query('email') email: string, @Query('redirect') redirect: string) {
         const validateResponse = await this.emailService.validateEmail(email);
         if (!validateResponse) {
-            return { statusCode: HttpStatus.FOUND, url: `${redirect}?found=false` };
+            return { statusCode: HttpStatus.FOUND, url: redirect };
         }
-        return { statusCode: HttpStatus.FOUND, url: `${redirect}?found=true` };
+        return { statusCode: HttpStatus.FOUND, url: redirect };
     }
 
     @Post('/resend')

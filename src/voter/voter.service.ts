@@ -107,7 +107,7 @@ export class VoterService {
             }
 
             // send email and check its been sent
-            await this.emailService.sendValidationEmail(email).catch(() => {
+            await this.emailService.sendValidationEmail({email, pollId, answers}).catch(() => {
                 return {
                     voterId: '',
                     voteStatus: 'emailError',

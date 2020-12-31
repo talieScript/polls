@@ -15,7 +15,7 @@ export class EmailService {
         private readonly pollService: PollsService,
     ) {}
 
-    async sendValidationEmail(email) {
+    async sendValidationEmail({email, pollId, answers}) {
         const transporter = nodemailer.createTransport({
             host: 'smtp.zoho.eu',
             port: 465,
@@ -33,7 +33,7 @@ export class EmailService {
             html: `
                 <h4>cunt</h4>
                 <p>
-                    Click <a href="${process.env.URL}/email?email=${email}&redirect=${process.env.EMAIL_REDIRECT}">here</a> to varifiy your email and validate your vote.<br>
+                    Click <a href="${process.env.URL}/email?email=${email}&redirect=${process.env.EMAIL_REDIRECT}/${pollId}?answers=${answers.join(',')}">here</a> to varifiy your email and validate your vote.<br>
                 </p>
                 <p>
                     Please do not reply to this email.
