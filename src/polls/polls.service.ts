@@ -16,15 +16,20 @@ export class PollsService {
         private readonly voterService: VoterService,
     ) {}
     
-    async findOne(pollId: string): Promise<Poll> {
-        const poll = await prisma.poll.findOne({ 
+    async findOne(pollId: string, select?: Object): Promise<any> {
+        const findOptions = {
             where: {
                 id: pollId
             },
             include: {
                 Answers: true
-            }
-        })
+            },
+            select
+        }
+        if (select) {
+            delete findOptions.include
+        }
+        const poll = await prisma.poll.findOne(findOptions)
         if (!poll) {
             throw new HttpException({
                 status: HttpStatus.NOT_FOUND,

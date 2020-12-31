@@ -158,16 +158,40 @@ export class VoterService {
         return await prisma.voter.findOne(findOptions);
     }
 
-    async getAnswersForPoll({voterId, pollId}) {
+    async getAnswersForPoll({voterEmail, voterIp, pollId}) {
+        const poll = await this.pollService.findOne(pollId, {options: true, voters: true});
+        const pollOptions = JSON.parse(poll.options)
+
         // get poll answers
         const pollAnswers = await this.pollService.getAnswers(pollId);
-        // get voter answers in poll
-        const voterAnswers = await prisma.voter.findOne({
-            where: { id: voterId },
-            select: { Answers: true }
-        })
+        debugger;
+        let voter;
+        if (pollOptions.validateIp) {
+            // if poll requires ip validation then get the user form the ip and ignore the email
+            voter = await prisma.voter.findMany({
+                where: {
+                    ip: voterIp,
+                    id: { in: poll.voters }
+                },
+                select: { Answers: true }
+            })
+        } else {
+            // if poll only requires email for validation then get the voter from the email
+            voter = await prisma.voter.findMany({
+                where: {
+                    email: voterEmail,
+                    id: { in: poll.voters }
+                },
+                select: { Answers: true }
+            })
+        }
+        if (!voter.length) {
+            return []
+        }
+        const voterAnswers = voter[0].Answers
+
         const pollAnswerIds = pollAnswers.Answers.map(a => a.id)
-        return voterAnswers.Answers.filter(voterAnswer => pollAnswerIds.indexOf(voterAnswer) + 1)
+        return voterAnswers.filter(voterAnswer => pollAnswerIds.indexOf(voterAnswer) + 1)
     }
 
 }

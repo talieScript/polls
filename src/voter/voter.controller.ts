@@ -3,24 +3,18 @@ import { VoterService } from './voter.service';
 
 @Controller('voter')
 export class VoterController {
-  constructor(private readonly voterService: VoterService) {}
+  constructor(
+    private readonly voterService: VoterService,
+  ) {}
 
   @Get('/answers/:pollId')
-  async getAnswersForPoll(@Param('pollId') pollId: string, @Query('email') email: string,): Promise<string[]> {
-    if (!email) {
+  async getAnswersForPoll(@Param('pollId') pollId: string, @Query('email') email: string, @Query('ip') ip: string,): Promise<string[]> {
+    if (!email && !ip) {
       throw new HttpException({
         status: HttpStatus.NOT_ACCEPTABLE,
-        error: 'Must provide email'
+        error: 'Must provide an email or ip address'
       }, 406);
     }
-    const voter = await this.voterService.getVoter({
-      where: {
-        email
-      }
-    })
-    if (!voter) {
-      return []
-    }
-    return await this.voterService.getAnswersForPoll({voterId: voter?.id, pollId})
+    return await this.voterService.getAnswersForPoll({voterIp: ip, pollId, voterEmail: email})
   }
 }
