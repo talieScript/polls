@@ -220,9 +220,6 @@ export class PollsService {
         if (parsedOptions.validateIp) {
             voterValidationResponse = await this.voterService.voterValidationWithIp({ipAddress, answers, pollId})
         }
-
-        console.log(typeof validateEmail)
-
         if(parsedOptions.validateEmail && voterValidationResponse.passed) {
             voterValidationResponse = await this.voterService.voterValidationWithEmail({email, ipAddress, answers, pollId, validateEmail})
         }       
