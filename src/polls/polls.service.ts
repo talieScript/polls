@@ -319,11 +319,12 @@ export class PollsService {
 
     async getPollList({page, order}) {
         const skip =  10 * (page - 1)
+        const direction = order !== 'end_date' ? 'desc' : 'asc'
         return prisma.poll.findMany({
             where: {
                 visibility: 'public',
             },
-            orderBy: { [order]: 'desc' },
+            orderBy: { [order]: direction },
             select: {
                 id: true,
                 title: true,
