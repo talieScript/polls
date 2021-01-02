@@ -12,8 +12,14 @@ export class PollsController {
   constructor(private readonly pollsService: PollsService) {}
 
   @Get('/list')
-  async getPollList(@Query('page') page: number = 1, @Query('order') order: string = 'created') {
-    return this.pollsService.getPollList({page, order})
+  async getPollList(
+    @Query('page') page: number = 1,
+    @Query('order') order: string = 'created',
+    @Query('ended') ended: string = 'false',
+    @Query('take') take: number,
+  ) {
+    const booleanEnded = ended === 'true' ? true : false
+    return this.pollsService.getPollList({page, order, ended: booleanEnded, take})
   }
 
   @Get('/:pollId')

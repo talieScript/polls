@@ -317,13 +317,19 @@ export class PollsService {
         })
     }
 
-    async getPollList({page, order}) {
+    async getPollList({page, order, ended, take = 10}) {
         const skip =  10 * (page - 1)
         const direction = order !== 'end_date' ? 'desc' : 'asc'
+        let where = {
+            visibility: 'public',
+        }
+        if (order === 'end_date') {
+            where['end_date'] = {
+                gte: dayjs().toISOString(),
+            }
+        }
         return prisma.poll.findMany({
-            where: {
-                visibility: 'public',
-            },
+            where,
             orderBy: { [order]: direction },
             select: {
                 id: true,
@@ -333,7 +339,7 @@ export class PollsService {
                 end_date: true
             },
             skip,
-            take: 10
+            take
         })
     }
 
