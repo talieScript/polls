@@ -13,8 +13,6 @@ export class PollsController {
 
   @Get('/list')
   async getPollList(@Query('page') page: number = 1, @Query('order') order: string = 'created') {
-    console.log('here')
-    debugger;
     return this.pollsService.getPollList({page, order})
   }
 

@@ -319,8 +319,10 @@ export class PollsService {
 
     async getPollList({page, order}) {
         const skip =  10 * (page - 1)
-        console.log(skip)
         return prisma.poll.findMany({
+            where: {
+                visibility: 'public',
+            },
             orderBy: { [order]: 'desc' },
             select: {
                 id: true,
