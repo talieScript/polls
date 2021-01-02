@@ -317,4 +317,21 @@ export class PollsService {
         })
     }
 
+    async getPollList({page, order}) {
+        const skip =  10 * (page - 1)
+        console.log(skip)
+        return prisma.poll.findMany({
+            orderBy: { [order]: 'desc' },
+            select: {
+                id: true,
+                title: true,
+                question: true,
+                created: true,
+                end_date: true
+            },
+            skip,
+            take: 10
+        })
+    }
+
 }

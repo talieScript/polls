@@ -11,6 +11,13 @@ import { Answer } from '../answers/interfaces/answer.interface'
 export class PollsController {
   constructor(private readonly pollsService: PollsService) {}
 
+  @Get('/list')
+  async getPollList(@Query('page') page: number = 1, @Query('order') order: string = 'created') {
+    console.log('here')
+    debugger;
+    return this.pollsService.getPollList({page, order})
+  }
+
   @Get('/:pollId')
   async getPoll(
     @Param('pollId') pollId: string,
