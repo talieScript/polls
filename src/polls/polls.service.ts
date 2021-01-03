@@ -319,15 +319,23 @@ export class PollsService {
 
         const date = dayjs().toDate()
 
-        return await prisma.$queryRaw(
-            `SELECT id, created, title, question, end_date FROM "Poll" 
-            WHERE "Poll".visibility = 'public' 
-            AND ("Poll".title LIKE $1 OR "Poll".question LIKE $1)
-            ${ended ? 'AND ("Poll".end_date < $2 OR "Poll".end_date > $2)' : `AND "Poll".end_date > $2`}
+        const polls = await prisma.$queryRaw(
+            `
+                SELECT id, created, title, question, end_date FROM "Poll" 
+                WHERE "Poll".visibility = 'public' 
+                AND ("Poll".title LIKE $1 OR "Poll".question LIKE $1)
+                ${ended ? 'AND ("Poll".end_date < $2 OR "Poll".end_date > $2)' : `AND "Poll".end_date > $2`}
+                ORDER BY ${order === 'created' ? '"Poll".created DESC' : '"Poll".end_date ASC'}
+                LIMIT $3
+                OFFSET $4
             `,
             `%${searchTerm}%`,
-            date
+            date,
+            take,
+            10 * (page - 1),
         )
+
+        return polls
         
         // const skip =  10 * (page - 1)
         // const direction = order !== 'end_date' ? 'desc' : 'asc'
