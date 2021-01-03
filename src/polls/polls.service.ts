@@ -254,8 +254,6 @@ export class PollsService {
             }
         })
 
-        debugger;
-
         //add answers to voter
         await prisma.voter.update({
             where: {
@@ -317,30 +315,62 @@ export class PollsService {
         })
     }
 
-    async getPollList({page, order, ended, take = 10}) {
-        const skip =  10 * (page - 1)
-        const direction = order !== 'end_date' ? 'desc' : 'asc'
-        let where = {
-            visibility: 'public',
-        }
-        if (order === 'end_date') {
-            where['end_date'] = {
-                gte: dayjs().toISOString(),
-            }
-        }
-        return prisma.poll.findMany({
-            where,
-            orderBy: { [order]: direction },
-            select: {
-                id: true,
-                title: true,
-                question: true,
-                created: true,
-                end_date: true
-            },
-            skip,
-            take
-        })
+    async getPollList({page, order, ended, take = 10, searchTerm}) {
+
+        const date = dayjs().toDate()
+
+        return await prisma.$queryRaw(
+            `SELECT id, created, title, question, end_date FROM "Poll" 
+            WHERE "Poll".visibility = 'public' 
+            AND ("Poll".title LIKE $1 OR "Poll".question LIKE $1)
+            ${ended ? 'AND ("Poll".end_date < $2 OR "Poll".end_date > $2)' : `AND "Poll".end_date > $2`}
+            `,
+            `%${searchTerm}%`,
+            date
+        )
+        
+        // const skip =  10 * (page - 1)
+        // const direction = order !== 'end_date' ? 'desc' : 'asc'
+        // let where = {
+        // }
+        // if (searchTerm) {
+        //     where['OR'] = [
+        //         {
+        //             title: { contains: searchTerm }
+        //         },
+        //         {
+        //             question: { contains: searchTerm }
+        //         },
+
+        //     ]
+        // } else if (!ended) {
+        //     where['OR'] = [
+        //         {
+        //             'end_date': { equals: null }
+        //         },
+        //         {
+        //             'end_date': {
+        //                 gte: dayjs().toISOString(),
+        //             }
+        //         }
+        //     ]
+        // }
+        // where['AND'] = {
+        //     visibility: 'public',
+        // }
+        // return prisma.poll.findMany({
+        //     where,
+        //     orderBy: { [order]: direction },
+        //     select: {
+        //         id: true,
+        //         title: true,
+        //         question: true,
+        //         created: true,
+        //         end_date: true
+        //     },
+        //     skip,
+        //     take
+        // })
     }
 
 }
