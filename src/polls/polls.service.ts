@@ -323,13 +323,13 @@ export class PollsService {
             `
                 SELECT id, created, title, question, end_date FROM "Poll" 
                 WHERE "Poll".visibility = 'public' 
-                AND ("Poll".title LIKE $1 OR "Poll".question LIKE $1)
+                AND (LOWER("Poll".title) LIKE $1 OR LOWER("Poll".question) LIKE $1)
                 ${ended ? 'AND ("Poll".end_date < $2 OR "Poll".end_date > $2)' : `AND "Poll".end_date > $2`}
                 ORDER BY ${order === 'created' ? '"Poll".created DESC' : '"Poll".end_date ASC'}
                 LIMIT $3
                 OFFSET $4
             `,
-            `%${searchTerm}%`,
+            `%${searchTerm.toLowerCase()}%`,
             date,
             take,
             10 * (page - 1),
