@@ -329,7 +329,7 @@ export class PollsService {
                 LIMIT $3
                 OFFSET $4
             `,
-            `%${searchTerm.toLowerCase()}%`,
+            `%${searchTerm.toLowerCase().trim()}%`,
             date,
             take,
             10 * (page - 1),
