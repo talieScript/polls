@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Query, HttpStatus, HttpException, } from '@nestjs/common';
+import { Controller, Get, Param, Query, HttpStatus, HttpException, Request, UseGuards } from '@nestjs/common';
 import { VoterService } from './voter.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('voter')
 export class VoterController {
@@ -16,5 +17,11 @@ export class VoterController {
       }, 406);
     }
     return await this.voterService.getAnswersForPoll({voterIp: ip, pollId, voterEmail: email})
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/profile')
+  async getProfile(@Request() req) {
+    return req.user
   }
 }
