@@ -6,11 +6,12 @@ import { VoterModule } from './voter/voter.module';
 import { EmailModule } from './email/email.module';
 import { ConfigModule } from '@nestjs/config';
 import { GoogleStrategy } from './auth/google.strategy'
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [PollsModule, VoterModule, EmailModule, ConfigModule.forRoot({
     envFilePath: '.development.env',
-  })],
+  }), AuthModule],
   controllers: [AppController],
   providers: [AppService, GoogleStrategy],
 })
