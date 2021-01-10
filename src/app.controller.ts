@@ -2,10 +2,13 @@ import { Controller, Get, Req, UseGuards, Request, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from './auth/guards/local-auth.guard';
+import { AuthService } from './auth/auth.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+  ) {}
 
   @Get()
   getHello(): string {
@@ -16,16 +19,5 @@ export class AppController {
   getIp(@Request() req) {
     return req.connection.remoteAddress;
   }
-
-  @Get('google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuth() {}
-
-  // request body should look like: {"email": "john@bowes.com", "password": "changeme"}
-  @UseGuards(LocalAuthGuard)
-  @Post('auth/login')
-  async login(@Request() req) {
-    return req.voter;
-  }  
 
 }

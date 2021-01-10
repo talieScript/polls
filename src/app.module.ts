@@ -8,9 +8,9 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [PollsModule, VoterModule, EmailModule, ConfigModule.forRoot({
+  imports: [PollsModule, VoterModule, EmailModule, AuthModule, ConfigModule.forRoot({
     envFilePath: '.development.env',
-  }), AuthModule],
+  })],
   controllers: [AppController],
   providers: [AppService],
 })
