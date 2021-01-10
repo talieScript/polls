@@ -1,4 +1,4 @@
-import { Controller, Body, Post, Param, Delete, Query, Get, HttpException, HttpStatus  } from '@nestjs/common';
+import { Controller, Body, Post, Param, Delete, Query, Get, HttpException, HttpStatus, UseGuards  } from '@nestjs/common';
 import { CreatePollDto } from './dto/CreatePoll.dto';
 import { VoteDto } from './dto/Vote.dto';
 import { ValidationPipe } from './pipes/polls.pipe';
@@ -6,6 +6,8 @@ import { PollsService } from './polls.service';
 import { Poll } from './interfaces/poll.interface'
 import { VoteStatusRes } from './interfaces/voteStatusResponce.interface'
 import { Answer } from '../answers/interfaces/answer.interface'
+import { DeletePollGuard } from './guards/deletePoll.guard'
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('polls')
 export class PollsController {
@@ -56,6 +58,7 @@ export class PollsController {
     return (await this.pollsService.getAnswers(pollId)).Answers;
   }
 
+  @UseGuards(JwtAuthGuard, DeletePollGuard)
   @Delete('/:pollId')
   async deletePoll(@Param('pollId') pollId: string) {
     return await this.pollsService.deletePoll(pollId);

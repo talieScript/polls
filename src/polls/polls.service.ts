@@ -1,12 +1,11 @@
 import { Injectable, HttpStatus, HttpException, Delete } from '@nestjs/common';
-import { Poll, Options } from './interfaces/poll.interface';
 import { Answer } from '../answers/interfaces/answer.interface';
 import { PrismaClient } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import { VoterService } from '../voter/voter.service';
 import { VoteStatusRes } from './interfaces/voteStatusResponce.interface'
-const hash = require('object-hash');
+
 
 const prisma = new PrismaClient();
 
