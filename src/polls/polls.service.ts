@@ -276,7 +276,7 @@ export class PollsService {
         }));
     }
 
-    async deletePoll(id, password) {
+    async deletePoll(id) {
         const poll = await prisma.poll.findOne({
             where: { id },
         });

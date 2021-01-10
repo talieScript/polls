@@ -57,7 +57,7 @@ export class PollsController {
   }
 
   @Delete('/:pollId')
-  async deletePoll(@Param('pollId') pollId: string, @Query('password') password: string) {
-    return await this.pollsService.deletePoll(pollId, password);
+  async deletePoll(@Param('pollId') pollId: string) {
+    return await this.pollsService.deletePoll(pollId);
   }
 }
