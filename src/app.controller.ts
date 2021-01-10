@@ -21,6 +21,7 @@ export class AppController {
   @UseGuards(AuthGuard('google'))
   async googleAuth() {}
 
+  // request body should look like: {"email": "john@bowes.com", "password": "changeme"}
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
   async login(@Request() req) {
