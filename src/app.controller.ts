@@ -1,6 +1,7 @@
-import { Controller, Get, Req, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards, Request, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { AuthGuard } from '@nestjs/passport';
+import { LocalAuthGuard } from './auth/auth/local-auth.guard';
 
 @Controller()
 export class AppController {
@@ -19,6 +20,12 @@ export class AppController {
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth() {}
+
+  @UseGuards(LocalAuthGuard)
+  @Post('auth/login')
+  async login(@Request() req) {
+    return req.user;
+  }  
 
   @Get('redirect')
   @UseGuards(AuthGuard('google'))
