@@ -1,0 +1,19 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateField",
+      "model": "Poll",
+      "field": "tags",
+      "type": "String",
+      "arity": "List"
+    },
+    {
+      "tag": "CreateField",
+      "model": "Voter",
+      "field": "password",
+      "type": "String",
+      "arity": "Optional"
+    }
+  ]
+}
