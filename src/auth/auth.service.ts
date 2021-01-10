@@ -5,7 +5,10 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private voterService: VoterService, private jwtService: JwtService) {}
+  constructor(
+    private voterService: VoterService,
+    private jwtService: JwtService
+  ) {}
 
   async authenticateVoter(email: string, pass: string): Promise<any> {
     const voter = await this.voterService.getVoter({
@@ -26,3 +29,4 @@ export class AuthService {
     };
   }
 }
+
