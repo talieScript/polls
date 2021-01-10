@@ -117,9 +117,7 @@ export class PollsService {
             createPollData.options = `${JSON.stringify(createPollData.options)}`;
         }
 
-        const { endDate, title, question, options, answers, visibility, password } = createPollData;
-
-        const passwordHash = hash(password)
+        const { endDate, title, question, options, answers, visibility, voterEmail = null } = createPollData;
 
         const pollData = {
             id: uuidv4(),
@@ -136,7 +134,7 @@ export class PollsService {
                         }),
                ),
             },
-            password: passwordHash,
+            voterEmail,
             visibility,
         }
 
@@ -147,7 +145,7 @@ export class PollsService {
         const newPoll =  await prisma.poll.create({
             data: pollData,
         });
-        Delete(newPoll.password)
+
         return newPoll;
     }
 
@@ -290,21 +288,13 @@ export class PollsService {
             }, 406);
         }
 
-        const passwordHash = hash(password);
-
-        if (passwordHash !== poll.password) {
-            throw new HttpException({
-                status: HttpStatus.NOT_ACCEPTABLE,
-                error: 'Incorrect delete password.'
-            }, 406);
-        }
-
-        // create poll specs table
-
-        return await prisma.poll.delete({
+        return await prisma.poll.update({
             where: {
                 id
-              }
+              },
+              data: {
+                  deleted: dayjs().toDate()
+              } 
         });
     }
 
