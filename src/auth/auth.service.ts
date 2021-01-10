@@ -11,9 +11,7 @@ export class AuthService {
       where: { email }
     })
 
-
-    
-    if(voter && compare(pass, voter.password )) {
+    if(voter?.password && await compare(pass, voter.password )) {
       return voter
     }
 
