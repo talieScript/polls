@@ -8,6 +8,10 @@ import { jwtConstants } from './constants';
 import { JwtStrategy } from './jwt.strategy';
 import { AuthController } from './auth.controller';
 import { DiscordStrategy } from './discord.strategy';
+import {
+	HttpModule,
+
+} from '@nestjs/common';
 
 @Module({
   imports: [
@@ -17,6 +21,7 @@ import { DiscordStrategy } from './discord.strategy';
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '1d' },
     }),
+    HttpModule
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy, DiscordStrategy],
   controllers: [AuthController],

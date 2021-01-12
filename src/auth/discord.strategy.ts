@@ -10,7 +10,7 @@ export class DiscordStrategy extends PassportStrategy(Strategy, 'discord') {
 			tokenURL         : 'https://discordapp.com/api/oauth2/token',
 			clientID         : process.env.DIS_CLIENT_ID,
 			clientSecret     : process.env.DIS_SECRET,
-			callbackURL      : process.env.URL + '/redirect',
+			callbackURL      : process.env.AUTH_REDIRECT,
 			scope            : ['email', 'identify'],
 		});
 	}
