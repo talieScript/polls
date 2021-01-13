@@ -1,6 +1,5 @@
-import { Controller, Get, Req, UseGuards, Request, Post, Body } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards, Request, Post, Body, Param } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { DiscordAuthGuard } from './guards/discord-auth-guard';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/sign-up.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -32,5 +31,11 @@ export class AuthController {
     async getUserFromDiscordLogin(@Req() req) {
       console.log(req)
       return req.user;
+    }
+
+    @Get('discord/:code')
+    async getUserFromDiscord(@Param('code') code: string) {
+
+      return await this.authService.getDiscordUser(code);
     }
 }
