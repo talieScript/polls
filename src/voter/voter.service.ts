@@ -143,7 +143,7 @@ export class VoterService {
 
     }
 
-    createVoterWithEamil({email, ip, answers}) {
+    createVoterWithEamil({email, ip = '', answers = []}) {
         return prisma.voter.create({
             data: {
                 id: uuidv4(),
@@ -192,6 +192,32 @@ export class VoterService {
 
         const pollAnswerIds = pollAnswers.Answers.map(a => a.id)
         return voterAnswers.filter(voterAnswer => pollAnswerIds.indexOf(voterAnswer) + 1)
+    }
+
+    async upsertVerifyVoter({email, name = null, picture = null}) {
+        return await prisma.voter.upsert({
+            select: {
+                email: true,
+                id: true,
+                name: true,
+                picture: true 
+            },
+            where: {
+                email
+            },
+            create: {
+                id: uuidv4(),
+                email,
+                picture,
+                name,
+                varified: true,
+            },
+            update: {
+                picture,
+                name,
+                varified: true,
+            }
+        })
     }
 
 }

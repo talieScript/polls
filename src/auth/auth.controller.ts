@@ -36,6 +36,6 @@ export class AuthController {
     @Get('discord/:code')
     async getUserFromDiscord(@Param('code') code: string) {
 
-      return await this.authService.getDiscordUser(code);
+      return await this.authService.getDiscordUserAndSignIn(code);
     }
 }

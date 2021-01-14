@@ -31,7 +31,7 @@ export class AuthService {
     };
   }
 
-  async getDiscordUser(code) {
+  async getDiscordUserAndSignIn(code) {
     const data = new FromData()
     data.append('grant_type', 'authorization_code');
     data.append('code', code);
@@ -55,11 +55,24 @@ export class AuthService {
 
     console.log(userRes)
 
-    // create a new voter if there issnt one with that email 
+    const { email, avatar, id, username } = userRes.data
 
-    // cerate a new cookie session 
+    const user = {
+      email,
+      picture: avatar ? `https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=128` : null,
+      name: username
+    }
+
+    const voter = await this.voterService.upsertVerifyVoter(user)
+
+    // craete a new cookie session
+    const access_token = this.jwtService.sign({ email, sub: voter.id })
 
     // return the user with the cookie
+    return {
+      user: voter,
+      access_token,
+    }
   }
 }
 
