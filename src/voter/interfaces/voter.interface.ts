@@ -6,7 +6,7 @@ export interface Voter {
     /**
      * ipAddress of the user
      */
-    ipAddress: string;
+    ipAddress?: string;
     /**
      * monggoDB id
      */
