@@ -36,8 +36,6 @@ export class AuthController {
     @Get('/discord')
     @UseGuards(AuthGuard('discord'))
     async getUserFromDiscordLogin(@Req() req) {
-      console.log(req.user.email)
-      // craete a new cookie session
       const access_token = this.jwtService.sign({ email: req.user.email, sub: req.user.id })
 
       return {
@@ -46,9 +44,17 @@ export class AuthController {
       }
     }
 
-    // @Get('google')
-    // @UseGuards(AuthGuard('google'))
-    // async googleAuth(@Req() req) {}
+    @Get('/google')
+    @UseGuards(AuthGuard('google'))
+    async googleAuth(@Req() req) {
+      const access_token = this.jwtService.sign({ email: req.user.email, sub: req.user.id })
+
+      return {
+        user: req.user,
+        access_token
+      }
+    }
+
 
     // @Get('google/redirect')
     // async getUserFromgoogle(@Query('code') code: string) {

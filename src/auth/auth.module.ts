@@ -8,6 +8,7 @@ import { jwtConstants } from './constants';
 import { JwtStrategy } from './jwt.strategy';
 import { AuthController } from './auth.controller';
 import { DiscordStrategy } from './discord.strategy';
+import { GoogleStrategy } from './google.strategy';
 import {
 	HttpModule,
 
@@ -23,7 +24,7 @@ import {
     }),
     HttpModule
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, DiscordStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, DiscordStrategy, GoogleStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}

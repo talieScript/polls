@@ -31,16 +31,16 @@ export class AuthService {
     };
   }
 
-  async getDiscordUserAndSignIn(code) {
+  async getGoogleUserAndSignIn(code) {
     const data = new FromData()
     data.append('grant_type', 'authorization_code');
     data.append('code', code);
     data.append('redirect_uri', process.env.AUTH_REDIRECT);
-    data.append('client_id', process.env.DIS_CLIENT_ID);
-    data.append('scope', 'identify');
-    data.append('client_secret', process.env.DIS_SECRET);
+    data.append('client_id', process.env.GOO_CLIENT_ID);
+    data.append('scope', 'profile');
+    data.append('client_secret', process.env.GOO_SECRET);
 
-    const res = await axios.post('https://discordapp.com/api/oauth2/token',
+    const res = await axios.post('https://oauth2.googleapis.com/token',
       data,
       {
         headers: {
@@ -49,6 +49,7 @@ export class AuthService {
       }
     )
 
+
     const userRes = await axios.get('https://discord.com/api/users/@me', {
       headers: { authorization: `Bearer ${res.data.access_token}`}
     })
@@ -56,23 +57,5 @@ export class AuthService {
     console.log(userRes)
 
     const { email, avatar, id, username } = userRes.data
-
-    const user = {
-      email,
-      picture: avatar ? `https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=128` : null,
-      name: username
-    }
-
-    const voter = await this.voterService.upsertVerifyVoter(user)
-
-    // craete a new cookie session
-    const access_token = this.jwtService.sign({ email, sub: voter.id })
-
-    // return the user with the cookie
-    return {
-      user: voter,
-      access_token,
-    }
   }
 }
-
