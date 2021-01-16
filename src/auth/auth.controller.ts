@@ -55,13 +55,6 @@ export class AuthController {
       }
     }
 
-
-    // @Get('google/redirect')
-    // async getUserFromgoogle(@Query('code') code: string) {
-    //   console.log(code)
-    //   return await this.authService.getGoogleUserAndSignIn(code);
-    // }
-
     @Get('/user')
     @UseGuards(JwtAuthGuard)
     async getUser(@Request() req) {
