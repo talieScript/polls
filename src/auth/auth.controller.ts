@@ -1,16 +1,21 @@
-import { Controller, Get, Req, UseGuards, Request, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards, Request, Post, Body, Param, Query, Res } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { VoterService } from '../voter/voter.service'
 import { SignUpDto } from './dto/sign-up.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Controller('auth')
 export class AuthController {
 
-    constructor( private readonly authService: AuthService, private readonly voterService: VoterService) {}
+    constructor(
+      private readonly authService: AuthService,
+      private readonly voterService: VoterService,
+      private readonly jwtService: JwtService
+    ) {}
 
     @Post('/sign-up')
     async signUp(@Body() SignUpDto: SignUpDto) {
@@ -28,18 +33,28 @@ export class AuthController {
       }
     }
 
-    @Get('discord')
+    @Get('/discord')
     @UseGuards(AuthGuard('discord'))
     async getUserFromDiscordLogin(@Req() req) {
-      console.log(req)
-      return req.user;
+      console.log(req.user.email)
+      // craete a new cookie session
+      const access_token = this.jwtService.sign({ email: req.user.email, sub: req.user.id })
+
+      return {
+        user: req.user,
+        access_token
+      }
     }
 
-    @Get('discord/:code')
-    async getUserFromDiscord(@Param('code') code: string) {
+    // @Get('google')
+    // @UseGuards(AuthGuard('google'))
+    // async googleAuth(@Req() req) {}
 
-      return await this.authService.getDiscordUserAndSignIn(code);
-    }
+    // @Get('google/redirect')
+    // async getUserFromgoogle(@Query('code') code: string) {
+    //   console.log(code)
+    //   return await this.authService.getGoogleUserAndSignIn(code);
+    // }
 
     @Get('/user')
     @UseGuards(JwtAuthGuard)
