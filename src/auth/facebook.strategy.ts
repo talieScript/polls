@@ -23,7 +23,6 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
 
   async validate (accessToken: string, refreshToken: string, profile: any): Promise<any> {
     const { name, email, picture } = profile._json
-    console.log(profile)
     const user = {
       email,
       picture: picture?.data?.url || null,

@@ -26,8 +26,6 @@ export class DiscordStrategy extends PassportStrategy(Strategy, 'discord') {
       headers: { authorization: `Bearer ${accessToken}`}
 		})
 
-		console.log(userRes)
-
 		const { email, avatar, id, username } = userRes.data
 
     const user = {

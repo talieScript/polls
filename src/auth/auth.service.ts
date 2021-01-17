@@ -49,12 +49,9 @@ export class AuthService {
       }
     )
 
-
     const userRes = await axios.get('https://discord.com/api/users/@me', {
       headers: { authorization: `Bearer ${res.data.access_token}`}
     })
-
-    console.log(userRes)
 
     const { email, avatar, id, username } = userRes.data
   }
