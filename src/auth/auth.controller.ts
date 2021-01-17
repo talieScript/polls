@@ -54,6 +54,17 @@ export class AuthController {
         access_token
       }
     }
+    
+    @Get('/facebook')
+    @UseGuards(AuthGuard('facebook'))
+    async facebookAuth(@Req() req) {
+      const access_token = this.jwtService.sign({ email: req.user.email, sub: req.user.id })
+
+      return {
+        user: req.user,
+        access_token
+      }
+    }
 
     @Get('/user')
     @UseGuards(JwtAuthGuard)
