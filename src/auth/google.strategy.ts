@@ -8,7 +8,7 @@ import { VoterService } from '../voter/voter.service';
 config();
 
 @Injectable()
-export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
+export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
   constructor(
     private voterService: VoterService,

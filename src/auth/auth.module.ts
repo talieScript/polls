@@ -9,6 +9,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { AuthController } from './auth.controller';
 import { DiscordStrategy } from './discord.strategy';
 import { GoogleStrategy } from './google.strategy';
+import { FacebookStrategy } from './facebook.strategy';
 import {
 	HttpModule,
 
@@ -24,7 +25,7 @@ import {
     }),
     HttpModule
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, DiscordStrategy, GoogleStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, DiscordStrategy, GoogleStrategy, FacebookStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}
