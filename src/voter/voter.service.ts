@@ -4,6 +4,7 @@ import { EmailService } from 'src/email/email.service';
 import { PollsService } from '../polls/polls.service';
 import { v4 as uuidv4 } from 'uuid';
 import { VoteStatusRes } from '../polls/interfaces/voteStatusResponce.interface'
+import { generate } from '../utils/passwordHashing'
 
 const prisma = new PrismaClient();
 
@@ -194,7 +195,18 @@ export class VoterService {
         return voterAnswers.filter(voterAnswer => pollAnswerIds.indexOf(voterAnswer) + 1)
     }
 
-    async upsertVerifyVoter({email, name = null, picture = null}) {
+    async upsertVerifyVoter({email, name = null, picture = null, password = null}) {
+        const update = {
+            picture,
+            name,
+            varified: true,
+            password: await generate(password),
+        }
+
+        if(!password) {
+            delete update.password
+        }
+
         return await prisma.voter.upsert({
             select: {
                 email: true,
@@ -211,12 +223,9 @@ export class VoterService {
                 picture,
                 name,
                 varified: true,
+                password
             },
-            update: {
-                picture,
-                name,
-                varified: true,
-            }
+            update,
         })
     }
 

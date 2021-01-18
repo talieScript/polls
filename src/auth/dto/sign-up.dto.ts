@@ -5,4 +5,6 @@ export class SignUpDto {
     readonly email: string;
     @IsString()
     readonly password: string;
+    @IsString()
+    readonly name: string;
 }

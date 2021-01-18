@@ -17,9 +17,14 @@ export class AuthController {
       private readonly jwtService: JwtService
     ) {}
 
-    @Post('/sign-up')
-    async signUp(@Body() SignUpDto: SignUpDto) {
-      
+    @Post('/signup')
+    async signUp(@Body() signUpDto: SignUpDto) {
+      const user = await this.authService.signUp(signUpDto)
+      const jwtTokenObj = await this.authService.login(user);
+      return {
+        user,
+        ...jwtTokenObj
+      }
     }  
 
     // request body should look like: {"email": "john@bowes.com", "password": "changeme"}

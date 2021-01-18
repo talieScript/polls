@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { VoterService } from '../voter/voter.service';
 import { compare } from '../utils/passwordHashing'
 import { JwtService } from '@nestjs/jwt';
@@ -31,28 +31,36 @@ export class AuthService {
     };
   }
 
-  async getGoogleUserAndSignIn(code) {
-    const data = new FromData()
-    data.append('grant_type', 'authorization_code');
-    data.append('code', code);
-    data.append('redirect_uri', process.env.AUTH_REDIRECT);
-    data.append('client_id', process.env.GOO_CLIENT_ID);
-    data.append('scope', 'profile');
-    data.append('client_secret', process.env.GOO_SECRET);
+  async signUp({email, password, name}) {
+    console.log(email )
+    console.log(password )
+    console.log(name )
+    if (password?.length > 20 || password?.lenght < 8) {
+      throw new HttpException({
+        status: HttpStatus.NOT_ACCEPTABLE,
+        error: `Password incorect length`,
+      }, 406);
+    }
+    console.log('here')
 
-    const res = await axios.post('https://oauth2.googleapis.com/token',
-      data,
-      {
-        headers: {
-          ...data.getHeaders()
-        }
-      }
-    )
-
-    const userRes = await axios.get('https://discord.com/api/users/@me', {
-      headers: { authorization: `Bearer ${res.data.access_token}`}
+    const voter = await this.voterService.getVoter({
+      where: {email}
     })
 
-    const { email, avatar, id, username } = userRes.data
+    if (voter?.password?.length) {
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: `User already exists`,
+      }, 403);
+    }
+
+    const user = {
+      email,
+      name,
+      password
+    }
+
+    return await this.voterService.upsertVerifyVoter(user)
   }
+
 }
