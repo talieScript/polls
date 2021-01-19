@@ -17,7 +17,7 @@ export class AuthService {
       where: { email }
     })
 
-    if(voter?.password && await compare(pass, voter.password )) {
+    if(voter?.password && await compare(pass, voter.password)) {
       return voter
     }
 
@@ -32,16 +32,12 @@ export class AuthService {
   }
 
   async signUp({email, password, name}) {
-    console.log(email )
-    console.log(password )
-    console.log(name )
     if (password?.length > 20 || password?.lenght < 8) {
       throw new HttpException({
         status: HttpStatus.NOT_ACCEPTABLE,
         error: `Password incorect length`,
       }, 406);
     }
-    console.log('here')
 
     const voter = await this.voterService.getVoter({
       where: {email}
