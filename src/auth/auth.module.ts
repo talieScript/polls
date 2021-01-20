@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { VoterModule } from '../voter/voter.module';
+import { EmailModule } from '../email/email.module';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
 import { JwtModule } from '@nestjs/jwt';
@@ -19,6 +20,7 @@ import {
   imports: [
     VoterModule,
     PassportModule,
+    EmailModule,
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '1d' },

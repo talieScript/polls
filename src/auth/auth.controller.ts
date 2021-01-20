@@ -89,4 +89,12 @@ export class AuthController {
         user
       }
     }
+
+    @Get('/forgotten-password')
+    async sendResetEmail(@Query('email') email: string) {
+      const res = await this.authService.sendResetEmail(email)
+      console.log('res', res)
+      return 'sent'
+    }
+
 }

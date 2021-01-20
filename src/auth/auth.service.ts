@@ -1,15 +1,21 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { VoterService } from '../voter/voter.service';
+import { EmailService } from '../email/email.service';
 import { compare } from '../utils/passwordHashing'
 import { JwtService } from '@nestjs/jwt';
-import axios from 'axios';
-import * as FromData from 'form-data' 
+import { PrismaClient } from '@prisma/client';
+import dayjs = require('dayjs');
+import { v4 as uuidv4 } from 'uuid';
 
+
+
+const prisma = new PrismaClient();
 @Injectable()
 export class AuthService {
   constructor(
     private voterService: VoterService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private emailService: EmailService
   ) {}
 
   async authenticateVoter(email: string, pass: string): Promise<any> {
@@ -57,6 +63,22 @@ export class AuthService {
     }
 
     return await this.voterService.upsertVerifyVoter(user)
+  }
+
+  async sendResetEmail(email) {
+    const pendingEmail = await prisma.forgottenPasswordPendingEmail.upsert({
+      where: {email},
+      update: {
+        id: uuidv4()
+      },
+      create: {
+        id: uuidv4(),
+        email,
+      }
+    })
+
+    // send email using email service
+    return this.emailService.sendPasswordResetEmail(email, pendingEmail.id)
   }
 
 }
