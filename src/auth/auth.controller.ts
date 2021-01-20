@@ -6,6 +6,7 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
+import { ForgottenPasswordDto } from './dto/forgotten-password.dto';
 
 
 @Controller('auth')
@@ -95,6 +96,11 @@ export class AuthController {
       const res = await this.authService.sendResetEmail(email)
       console.log('res', res)
       return 'sent'
+    }
+
+    @Post('/forgotten-password')
+    async updatePassword(@Body() forgotPasswordDto: ForgottenPasswordDto) {
+      return await this.authService.updatePassword(forgotPasswordDto)
     }
 
 }

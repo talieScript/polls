@@ -229,4 +229,13 @@ export class VoterService {
         })
     }
 
+    async updateVoterPassword({password, email}) {
+        return await prisma.voter.update({
+            where: {email},
+            data: {
+                password: await generate(password)
+            }
+        })
+    }
+
 }

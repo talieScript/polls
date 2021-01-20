@@ -131,6 +131,7 @@ export class EmailService {
             subject: 'Reset email',
             html: `
                 <h4>Reset email</h4>
+                this link will last 1 hour
                 <p>
                     Click ${process.env.FRONT_END_URL}/reset-password?id=${id}
                 </p>

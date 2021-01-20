@@ -81,4 +81,39 @@ export class AuthService {
     return this.emailService.sendPasswordResetEmail(email, pendingEmail.id)
   }
 
+  async updatePassword({password, email, id}) {
+    if (password?.length > 20 || password?.lenght < 8) {
+      throw new HttpException({
+        status: HttpStatus.NOT_ACCEPTABLE,
+        error: `Password incorect length`,
+      }, 406);
+    }
+    console.log('here')
+    // check there is a pending request and it hsa not expired
+    const pendingRequest = await prisma.forgottenPasswordPendingEmail.findOne({
+      where: {
+        id
+      }
+    })
+    if (!pendingRequest || dayjs(pendingRequest.created).isBefore(dayjs().subtract(1, 'hour'))) {
+      throw new HttpException({
+        status: HttpStatus.FORBIDDEN,
+        error: `no pending request found or has expired`,
+      }, 403);
+    }
+
+
+    const voter = await this.voterService.updateVoterPassword({password, email})
+
+    console.log(voter)
+
+    prisma.forgottenPasswordPendingEmail.delete({
+      where: { id }
+    })
+
+    return 'done'
+  }
+
+
+
 }
