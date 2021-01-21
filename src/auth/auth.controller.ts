@@ -26,7 +26,12 @@ export class AuthController {
         user,
         ...jwtTokenObj
       }
-    }  
+    }
+
+    @Post('/logout')
+    async logout(@Request() req) {
+      req.logout()
+    }
 
     // request body should look like: {"email": "john@bowes.com", "password": "changeme"}
     @Post('/login')

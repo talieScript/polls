@@ -10,11 +10,11 @@ export class DiscordStrategy extends PassportStrategy(Strategy, 'discord') {
 		private voterService: VoterService,
 	) {
 		super({
-			authorizationURL : 'https://discord.com/api/oauth2/authorize?client_id=798309872042377336&redirect_uri=http%3A%2F%2Flocalhost%3A8000&response_type=code&scope=email%20identify',
+			authorizationURL : 'https://discord.com/api/oauth2/authorize?client_id=798309872042377336&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fdiscord&response_type=code&scope=identify%20email',
 			tokenURL         : 'https://discordapp.com/api/oauth2/token',
 			clientID         : process.env.DIS_CLIENT_ID,
 			clientSecret     : process.env.DIS_SECRET,
-			callbackURL      : `${process.env.FRONT_END_URL}/rediect?strat=discord`,
+			callbackURL      : `${process.env.FRONT_END_URL}/redirect?strat=discord`,
 			scope            : ['email', 'identify'],
 		});
 	}

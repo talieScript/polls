@@ -102,14 +102,13 @@ export class AuthService {
       }, 403);
     }
 
-
-    const voter = await this.voterService.updateVoterPassword({password, email})
-
-    console.log(voter)
-
-    prisma.forgottenPasswordPendingEmail.delete({
-      where: { id }
-    })
+    try {
+      await prisma.forgottenPasswordPendingEmail.delete({
+        where: { id }
+      })
+    } catch (error) {
+      console.log(error)
+    }
 
     return 'done'
   }
