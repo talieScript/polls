@@ -96,13 +96,14 @@ export class AuthController {
       }
     }
 
+    // request pasword change
     @Get('/forgotten-password')
     async sendResetEmail(@Query('email') email: string) {
-      const res = await this.authService.sendResetEmail(email)
-      console.log('res', res)
+      await this.authService.sendResetEmail(email)
       return 'sent'
     }
 
+    // post password reset
     @Post('/forgotten-password')
     async updatePassword(@Body() forgotPasswordDto: ForgottenPasswordDto) {
       return await this.authService.updatePassword(forgotPasswordDto)

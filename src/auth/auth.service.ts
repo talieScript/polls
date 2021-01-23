@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { VoterService } from '../voter/voter.service';
 import { EmailService } from '../email/email.service';
-import { compare } from '../utils/passwordHashing'
+import { compare, generate } from '../utils/passwordHashing'
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
 import dayjs = require('dayjs');
@@ -81,14 +81,13 @@ export class AuthService {
     return this.emailService.sendPasswordResetEmail(email, pendingEmail.id)
   }
 
-  async updatePassword({password, email, id}) {
+  async updatePassword({password, id}) {
     if (password?.length > 20 || password?.lenght < 8) {
       throw new HttpException({
         status: HttpStatus.NOT_ACCEPTABLE,
         error: `Password incorect length`,
       }, 406);
     }
-    console.log('here')
     // check there is a pending request and it hsa not expired
     const pendingRequest = await prisma.forgottenPasswordPendingEmail.findOne({
       where: {
@@ -102,13 +101,27 @@ export class AuthService {
       }, 403);
     }
 
-    try {
-      await prisma.forgottenPasswordPendingEmail.delete({
-        where: { id }
-      })
-    } catch (error) {
-      console.log(error)
+    const voter = await prisma.voter.findOne({
+      where: { email: pendingRequest.email }
+    })
+
+    // if voter has no password already, that means then have not signed up in the first place
+    if (!voter.password) {
+      throw new HttpException({
+        status: HttpStatus.NOT_ACCEPTABLE,
+        error: `User does no exist`,
+      }, 406);
     }
+
+    // chnage the users password
+    await prisma.voter.update({
+      where: { email: voter.email },
+      data: { password: await generate(password) }
+    })
+
+    await prisma.forgottenPasswordPendingEmail.delete({
+      where: { id }
+    })
 
     return 'done'
   }
