@@ -109,14 +109,14 @@ export class PollsService {
      * @param createPollData
      * @summary Creates a new poll and returns newly created poll json.
      */
-    async createPoll(createPollData) {
+    async createPoll(createPollData, user?) {
         if (!createPollData.options) {
             createPollData.options = '{"choiceNoStrict": false, "validateEmail": false, "validateIp": true, "choiceNo": 1}';
         } else {
             createPollData.options = `${JSON.stringify(createPollData.options)}`;
         }
 
-        const { endDate, title, question, options, answers, visibility, voterEmail = null } = createPollData;
+        const { endDate, title, question, options, answers, visibility } = createPollData;
 
         const pollData = {
             id: uuidv4(),
@@ -133,7 +133,6 @@ export class PollsService {
                         }),
                ),
             },
-            voterEmail,
             visibility,
         }
 
@@ -144,6 +143,19 @@ export class PollsService {
         const newPoll =  await prisma.poll.create({
             data: pollData,
         });
+
+        if(user) {
+            prisma.voter.update({
+                where: {
+                    email: user.email
+                },
+                data: {
+                    polls: { connect: {
+                        id: newPoll.id
+                    }}
+                }
+            })
+        }
 
         return newPoll;
     }
