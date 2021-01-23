@@ -1,6 +1,6 @@
 import { Injectable, HttpStatus, HttpException, Delete } from '@nestjs/common';
 import { Answer } from '../answers/interfaces/answer.interface';
-import { PrismaClient } from '@prisma/client';
+import { Poll, PrismaClient } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import { VoterService } from '../voter/voter.service';
@@ -140,24 +140,16 @@ export class PollsService {
             delete pollData.end_date
         }
 
-        const newPoll =  await prisma.poll.create({
+
+        if(user) {
+            pollData['Voter'] = { connect: { id: user.userId }}
+        }
+
+        const newPoll: Poll =  await prisma.poll.create({
             data: pollData,
         });
 
-        if(user) {
-            prisma.voter.update({
-                where: {
-                    email: user.email
-                },
-                data: {
-                    polls: { connect: {
-                        id: newPoll.id
-                    }}
-                }
-            })
-        }
-
-        return newPoll;
+        return newPoll.id;
     }
 
     /**

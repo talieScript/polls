@@ -1,4 +1,4 @@
-import { Controller, Body, Post, Param, Delete, Query, Get, HttpException, HttpStatus, UseGuards  } from '@nestjs/common';
+import { Controller, Body, Post, Param, Delete, Query, Get, HttpException, HttpStatus, UseGuards, Req  } from '@nestjs/common';
 import { CreatePollDto } from './dto/CreatePoll.dto';
 import { VoteDto } from './dto/Vote.dto';
 import { ValidationPipe } from './pipes/polls.pipe';
@@ -43,7 +43,15 @@ export class PollsController {
   @Post()
   async createPoll(@Body() createPollDto: CreatePollDto) {
     const createdPoll = await this.pollsService.createPoll(createPollDto);
-    return createdPoll.id;
+    return createdPoll;
+  }
+  
+  @UseGuards(JwtAuthGuard)
+  @Post('/authenticated')
+  async createPollWithUser(@Req() req, @Body() createPollDto: CreatePollDto) {
+   const user = req.user
+    const createdPoll = await this.pollsService.createPoll(createPollDto, user);
+    return createdPoll;
   }
 
   @Post('/:pollId')
