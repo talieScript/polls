@@ -7,9 +7,9 @@ export interface Answer {
      */
     answer_string: string;
     /**
-     * The total number of votes to this answer
+     * an array of unix timestamps
      */
-    votes: number;
+    votes: number[];
     /**
      * id
      */

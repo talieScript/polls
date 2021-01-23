@@ -270,7 +270,7 @@ export class PollsService {
         return Promise.all(answersFromDatabase.map(answer => {
             return prisma.answer.update({
                 where: { id: answer.id },
-                data: { votes: answer.votes + 1 },
+                data: { votes: {set: dayjs().unix()} },
             });
         }));
     }
