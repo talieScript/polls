@@ -73,14 +73,14 @@ export class VoterService {
         };
     }
 
-    async voterValidationWithEmail({email, ipAddress, answers, pollId, validateEmail}): Promise<VoteValidationRrturn> {
+    async voterValidationWithEmail({email, ipAddress, answers, pollId, user}): Promise<VoteValidationRrturn> {
         const pollVoters: {voters: string[]} = await prisma.poll.findOne({
             where: {id: pollId},
             select: { voters: true },
         }) as {voters: string[]};
 
         const currentVoter = await prisma.voter.findOne({
-            where: {email},
+            where: {email: user?.email || email},
         });
 
         const voterIds: string[]  = pollVoters.voters;
@@ -94,9 +94,9 @@ export class VoterService {
         }
 
         // If no record of voter with that email or asked by the frontend to validate then send email confirmation email.
-        if (!currentVoter || validateEmail) {
+        if (!currentVoter || !user) {
             const pendingEmail = await prisma.pendingEmail.findOne({
-                where: {email},
+                where: {email: user?.email || email},
             });
             // if this voter has already voted and the email is awaiting validation
             if (pendingEmail) {
@@ -118,7 +118,7 @@ export class VoterService {
 
             await prisma.pendingEmail.create({
                 data: {
-                    email,
+                    email: user?.email || email,
                     answers: { set: answers },
                     ip: ipAddress,
                 },

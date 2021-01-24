@@ -55,9 +55,16 @@ export class PollsController {
   }
 
   @Post('/:pollId')
-  async vote(@Param('pollId') pollId: string, @Query('validateEmail') validateEmail: string, @Body(new ValidationPipe()) voteData: VoteDto): Promise<VoteStatusRes> {
-    const validateEmailBoolean = validateEmail === 'true' ? true : false
-    const validAndPollId = await this.pollsService.validateVote({voteData, pollId, validateEmail: validateEmailBoolean});
+  async vote(@Req() req, @Param('pollId') pollId: string, @Query('validateEmail') validateEmail: string, @Body(new ValidationPipe()) voteData: VoteDto): Promise<VoteStatusRes> {
+    const validAndPollId = await this.pollsService.validateVote({voteData, pollId});
+    return validAndPollId;
+  }
+  
+  @UseGuards(JwtAuthGuard)
+  @Post('/:pollId/authenticated')
+  async votewithUser(@Req() req, @Param('pollId') pollId: string, @Query('validateEmail') validateEmail: string, @Body(new ValidationPipe()) voteData: VoteDto): Promise<VoteStatusRes> {
+    const user = req.user
+    const validAndPollId = await this.pollsService.validateVote({voteData, pollId, user});
     return validAndPollId;
   }
 
