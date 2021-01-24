@@ -4,6 +4,7 @@ import { EmailService } from 'src/email/email.service';
 import { PollsService } from '../polls/polls.service';
 import { v4 as uuidv4 } from 'uuid';
 import { VoteStatusRes } from '../polls/interfaces/voteStatusResponce.interface'
+import { generate } from '../utils/passwordHashing'
 
 const prisma = new PrismaClient();
 
@@ -72,14 +73,14 @@ export class VoterService {
         };
     }
 
-    async voterValidationWithEmail({email, ipAddress, answers, pollId, validateEmail}): Promise<VoteValidationRrturn> {
+    async voterValidationWithEmail({email, ipAddress, answers, pollId, user}): Promise<VoteValidationRrturn> {
         const pollVoters: {voters: string[]} = await prisma.poll.findOne({
             where: {id: pollId},
             select: { voters: true },
         }) as {voters: string[]};
 
         const currentVoter = await prisma.voter.findOne({
-            where: {email},
+            where: {email: user?.email || email},
         });
 
         const voterIds: string[]  = pollVoters.voters;
@@ -93,9 +94,9 @@ export class VoterService {
         }
 
         // If no record of voter with that email or asked by the frontend to validate then send email confirmation email.
-        if (!currentVoter || validateEmail) {
+        if (!currentVoter || !user) {
             const pendingEmail = await prisma.pendingEmail.findOne({
-                where: {email},
+                where: {email: user?.email || email},
             });
             // if this voter has already voted and the email is awaiting validation
             if (pendingEmail) {
@@ -117,7 +118,7 @@ export class VoterService {
 
             await prisma.pendingEmail.create({
                 data: {
-                    email,
+                    email: user?.email || email,
                     answers: { set: answers },
                     ip: ipAddress,
                 },
@@ -143,7 +144,7 @@ export class VoterService {
 
     }
 
-    createVoterWithEamil({email, ip, answers}) {
+    createVoterWithEamil({email, ip = '', answers = []}) {
         return prisma.voter.create({
             data: {
                 id: uuidv4(),
@@ -192,6 +193,49 @@ export class VoterService {
 
         const pollAnswerIds = pollAnswers.Answers.map(a => a.id)
         return voterAnswers.filter(voterAnswer => pollAnswerIds.indexOf(voterAnswer) + 1)
+    }
+
+    async upsertVerifyVoter({email, name = null, picture = null, password = null}) {
+        const update = {
+            picture,
+            name,
+            varified: true,
+            password: await generate(password),
+        }
+
+        if(!password) {
+            delete update.password
+        }
+
+        return await prisma.voter.upsert({
+            select: {
+                email: true,
+                id: true,
+                name: true,
+                picture: true 
+            },
+            where: {
+                email
+            },
+            create: {
+                id: uuidv4(),
+                email,
+                picture,
+                name,
+                varified: true,
+                password
+            },
+            update,
+        })
+    }
+
+    async updateVoterPassword({password, email}) {
+        return await prisma.voter.update({
+            where: {email},
+            data: {
+                password: await generate(password)
+            }
+        })
     }
 
 }

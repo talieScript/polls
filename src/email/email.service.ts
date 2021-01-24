@@ -6,6 +6,8 @@ import { VoterService } from '../voter/voter.service';
 import { PollsService } from '../polls/polls.service';
 
 const prisma = new PrismaClient();
+
+
 @Injectable()
 export class EmailService {
     constructor(
@@ -16,6 +18,7 @@ export class EmailService {
     ) {}
 
     async sendValidationEmail({email, pollId, answers}) {
+
         const transporter = nodemailer.createTransport({
             host: 'smtp.zoho.eu',
             port: 465,
@@ -107,5 +110,44 @@ export class EmailService {
         }
 
         this.sendValidationEmail(email)
+    }
+
+    async sendPasswordResetEmail(email, id) {
+
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.zoho.eu',
+            port: 465,
+            secure: true, // use SSL
+            auth: {
+                user: process.env.EMAIL_USERNAME,
+                pass: process.env.EMAIL_PASSWORD,
+            },
+        });
+
+       // send email baby
+        const mailOptions = {
+            from: `"Easy Polls" <${process.env.EMAIL_USERNAME}>`,
+            to: email,
+            subject: 'Reset email',
+            html: `
+                <h4>Reset email</h4>
+                this link will last 1 hour
+                <p>
+                    Click ${process.env.FRONT_END_URL}/reset-password?id=${id}
+                </p>
+                <p>
+                    Please do not reply to this email.
+                </p>
+            `,
+        };
+
+        // send mail with defined transport object
+        return await transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log('error')
+                return error;
+            }
+            return 'sent';
+        })
     }
 }

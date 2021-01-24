@@ -6,3 +6,13 @@
 20201222155338-end-date-optional
 20210101155805-added-index-to-answer
 20210110134516-password---tags
+20210110175357-added-voter-email-and-removed-poll-passwords
+20210110175845-added-deleted-date-to-poll
+20210114183645-voter-ip-optional
+20210114191433-picture-and-name-for-voter
+20210119213120-added-pending-forgotten-password-pending-email
+20210120213446-added-id
+20210123173216-deleted-votes
+20210123173301-added-votes-as-int-array
+20210123205234-added-polls-to-voter
+20210124112629-added-total-votes

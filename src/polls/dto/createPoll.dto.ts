@@ -36,6 +36,4 @@ export class CreatePollDto {
     readonly endDate: Date;
     @IsString()
     readonly visibility: string
-    @IsString()
-    readonly password: string;
 }

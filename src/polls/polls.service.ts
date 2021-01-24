@@ -1,12 +1,11 @@
 import { Injectable, HttpStatus, HttpException, Delete } from '@nestjs/common';
-import { Poll, Options } from './interfaces/poll.interface';
 import { Answer } from '../answers/interfaces/answer.interface';
-import { PrismaClient } from '@prisma/client';
+import { Poll, PrismaClient } from '@prisma/client';
 import * as dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import { VoterService } from '../voter/voter.service';
 import { VoteStatusRes } from './interfaces/voteStatusResponce.interface'
-const hash = require('object-hash');
+
 
 const prisma = new PrismaClient();
 
@@ -110,16 +109,14 @@ export class PollsService {
      * @param createPollData
      * @summary Creates a new poll and returns newly created poll json.
      */
-    async createPoll(createPollData) {
+    async createPoll(createPollData, user?) {
         if (!createPollData.options) {
             createPollData.options = '{"choiceNoStrict": false, "validateEmail": false, "validateIp": true, "choiceNo": 1}';
         } else {
             createPollData.options = `${JSON.stringify(createPollData.options)}`;
         }
 
-        const { endDate, title, question, options, answers, visibility, password } = createPollData;
-
-        const passwordHash = hash(password)
+        const { endDate, title, question, options, answers, visibility } = createPollData;
 
         const pollData = {
             id: uuidv4(),
@@ -136,7 +133,6 @@ export class PollsService {
                         }),
                ),
             },
-            password: passwordHash,
             visibility,
         }
 
@@ -144,11 +140,16 @@ export class PollsService {
             delete pollData.end_date
         }
 
-        const newPoll =  await prisma.poll.create({
+
+        if(user) {
+            pollData['Voter'] = { connect: { id: user.userId }}
+        }
+
+        const newPoll: Poll =  await prisma.poll.create({
             data: pollData,
         });
-        Delete(newPoll.password)
-        return newPoll;
+
+        return newPoll.id;
     }
 
     /**
@@ -156,7 +157,7 @@ export class PollsService {
      * @param voteData
      * @summary Votes on a poll and creates a voter if not already existent
      */
-    async validateVote({voteData, pollId, validateEmail}): Promise<VoteStatusRes> {
+    async validateVote({voteData, pollId, user = null}): Promise<VoteStatusRes> {
         const pollAnswers = await prisma.answer.findMany({
             where: { Poll: pollId },
         })
@@ -222,8 +223,8 @@ export class PollsService {
             voterValidationResponse = await this.voterService.voterValidationWithIp({ipAddress, answers, pollId})
         }
         if(parsedOptions.validateEmail && voterValidationResponse.passed) {
-            voterValidationResponse = await this.voterService.voterValidationWithEmail({email, ipAddress, answers, pollId, validateEmail})
-        }       
+            voterValidationResponse = await this.voterService.voterValidationWithEmail({email, ipAddress, answers, pollId, user})
+        }
 
         delete voterValidationResponse.passed
         return voterValidationResponse;
@@ -242,7 +243,7 @@ export class PollsService {
 
         const poll = await prisma.poll.findOne({
             where: { id: pollId },
-            select: { voters: true },
+            select: { voters: true, totalVotes: true },
         });
 
         const voter = await prisma.voter.findOne({
@@ -260,25 +261,25 @@ export class PollsService {
                 id: voterId
             },
             data: {
-                Answers: { set: [...voter.Answers, ...answers]}
+                Answers: { set: [...voter.Answers, ...answers] }
             }
         })
 
         // add voter to poll
         await prisma.poll.update({
             where: { id: pollId },
-            data: { voters: { set: [...poll.voters, voterId]}},
+            data: { voters: { set: [...poll.voters, voterId]}, totalVotes: poll.totalVotes + answers.length},
         });
 
         return Promise.all(answersFromDatabase.map(answer => {
             return prisma.answer.update({
                 where: { id: answer.id },
-                data: { votes: answer.votes + 1 },
+                data: { votes: {set: dayjs().unix()} },
             });
         }));
     }
 
-    async deletePoll(id, password) {
+    async deletePoll(id) {
         const poll = await prisma.poll.findOne({
             where: { id },
         });
@@ -290,28 +291,20 @@ export class PollsService {
             }, 406);
         }
 
-        const passwordHash = hash(password);
-
-        if (passwordHash !== poll.password) {
-            throw new HttpException({
-                status: HttpStatus.NOT_ACCEPTABLE,
-                error: 'Incorrect delete password.'
-            }, 406);
-        }
-
-        // create poll specs table
-
-        return await prisma.poll.delete({
+        return await prisma.poll.update({
             where: {
                 id
-              }
+              },
+              data: {
+                  deleted: dayjs().toDate()
+              } 
         });
     }
 
     async getAnswers(pollId) {
         return await prisma.poll.findOne({
             where: { id: pollId },
-            select: { Answers: true }
+            select: { Answers: true, totalVotes: true }
         })
     }
 
@@ -336,49 +329,6 @@ export class PollsService {
         )
 
         return polls
-        
-        // const skip =  10 * (page - 1)
-        // const direction = order !== 'end_date' ? 'desc' : 'asc'
-        // let where = {
-        // }
-        // if (searchTerm) {
-        //     where['OR'] = [
-        //         {
-        //             title: { contains: searchTerm }
-        //         },
-        //         {
-        //             question: { contains: searchTerm }
-        //         },
-
-        //     ]
-        // } else if (!ended) {
-        //     where['OR'] = [
-        //         {
-        //             'end_date': { equals: null }
-        //         },
-        //         {
-        //             'end_date': {
-        //                 gte: dayjs().toISOString(),
-        //             }
-        //         }
-        //     ]
-        // }
-        // where['AND'] = {
-        //     visibility: 'public',
-        // }
-        // return prisma.poll.findMany({
-        //     where,
-        //     orderBy: { [order]: direction },
-        //     select: {
-        //         id: true,
-        //         title: true,
-        //         question: true,
-        //         created: true,
-        //         end_date: true
-        //     },
-        //     skip,
-        //     take
-        // })
     }
 
 }

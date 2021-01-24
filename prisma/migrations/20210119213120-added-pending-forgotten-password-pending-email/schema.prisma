@@ -4,14 +4,14 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "***"
 }
 
 model Answer {
   answer_string     String
   id                String  @id
+  votes             Int?    @default(0)
   index             Int
-  votes             Int[]
   Poll              String?
   Poll_AnswerToPoll Poll?   @relation(fields: [Poll], references: [id])
 }
@@ -26,7 +26,6 @@ model PendingEmail {
 model ForgottenPasswordPendingEmail {
   created DateTime @default(now())
   email   String @unique
-  id      String @id
 }
 
 model Poll {
@@ -41,7 +40,6 @@ model Poll {
   Answers    Answer[]
   visibility String
   tags       String[] 
-  totalVotes Int @default(0)
   deleted    DateTime?
 }
 
@@ -54,5 +52,4 @@ model Voter {
   varified    Boolean @default(false)
   picture     String?
   name        String?
-  polls       Poll[]
 }

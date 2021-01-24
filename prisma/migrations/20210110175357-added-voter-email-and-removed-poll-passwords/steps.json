@@ -1,0 +1,22 @@
+{
+  "version": "0.3.14-fixed",
+  "steps": [
+    {
+      "tag": "CreateField",
+      "model": "Poll",
+      "field": "voterEmail",
+      "type": "String",
+      "arity": "Optional"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Poll",
+      "field": "voterId"
+    },
+    {
+      "tag": "DeleteField",
+      "model": "Poll",
+      "field": "password"
+    }
+  ]
+}
