@@ -22,7 +22,7 @@ export class EmailService {
         const transporter = nodemailer.createTransport({
             host: 'smtp.zoho.eu',
             port: 465,
-            secure: true, // use SSL
+            secure: true,
             auth: {
                 user: process.env.EMAIL_USERNAME,
                 pass: process.env.EMAIL_PASSWORD,
@@ -75,6 +75,7 @@ export class EmailService {
             // Create voter
             voter = await this.voterService.createVoterWithEamil(pendingEmailData)
                 .catch(error => {
+                    console.log(error)
                     return null;
                 });
             if (!voter) {
@@ -109,7 +110,9 @@ export class EmailService {
             }, 404);
         }
 
-        this.sendValidationEmail(email)
+        const {pollId, answers} = pendingEmail
+
+        this.sendValidationEmail({email, answers, pollId})
     }
 
     async sendPasswordResetEmail(email, id) {

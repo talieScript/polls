@@ -121,6 +121,7 @@ export class VoterService {
                     email: user?.email || email,
                     answers: { set: answers },
                     ip: ipAddress,
+                    pollId,
                 },
             });
 
