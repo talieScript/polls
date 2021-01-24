@@ -304,7 +304,7 @@ export class PollsService {
     async getAnswers(pollId) {
         return await prisma.poll.findOne({
             where: { id: pollId },
-            select: { Answers: true }
+            select: { Answers: true, totalVotes: true }
         })
     }
 

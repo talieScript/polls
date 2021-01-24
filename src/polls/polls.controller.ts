@@ -55,22 +55,22 @@ export class PollsController {
   }
 
   @Post('/:pollId')
-  async vote(@Req() req, @Param('pollId') pollId: string, @Query('validateEmail') validateEmail: string, @Body(new ValidationPipe()) voteData: VoteDto): Promise<VoteStatusRes> {
+  async vote(@Param('pollId') pollId: string, @Body(new ValidationPipe()) voteData: VoteDto): Promise<VoteStatusRes> {
     const validAndPollId = await this.pollsService.validateVote({voteData, pollId});
     return validAndPollId;
   }
-  
+
   @UseGuards(JwtAuthGuard)
   @Post('/:pollId/authenticated')
-  async votewithUser(@Req() req, @Param('pollId') pollId: string, @Query('validateEmail') validateEmail: string, @Body(new ValidationPipe()) voteData: VoteDto): Promise<VoteStatusRes> {
+  async votewithUser(@Req() req, @Param('pollId') pollId: string, @Body(new ValidationPipe()) voteData: VoteDto): Promise<VoteStatusRes> {
     const user = req.user
     const validAndPollId = await this.pollsService.validateVote({voteData, pollId, user});
     return validAndPollId;
   }
 
   @Get('/:pollId/answers')
-  async getAnswers(@Param('pollId') pollId: string): Promise<Answer[]> {
-    return (await this.pollsService.getAnswers(pollId)).Answers;
+  async getAnswers(@Param('pollId') pollId: string): Promise<{Answers: Answer[], totalVotes: number}> {
+    return await this.pollsService.getAnswers(pollId);
   }
 
   @UseGuards(JwtAuthGuard, DeletePollGuard)
