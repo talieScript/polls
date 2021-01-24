@@ -243,7 +243,7 @@ export class PollsService {
 
         const poll = await prisma.poll.findOne({
             where: { id: pollId },
-            select: { voters: true },
+            select: { voters: true, totalVotes: true },
         });
 
         const voter = await prisma.voter.findOne({
@@ -261,14 +261,14 @@ export class PollsService {
                 id: voterId
             },
             data: {
-                Answers: { set: [...voter.Answers, ...answers]}
+                Answers: { set: [...voter.Answers, ...answers] }
             }
         })
 
         // add voter to poll
         await prisma.poll.update({
             where: { id: pollId },
-            data: { voters: { set: [...poll.voters, voterId]}},
+            data: { voters: { set: [...poll.voters, voterId]}, totalVotes: poll.totalVotes + answers.length},
         });
 
         return Promise.all(answersFromDatabase.map(answer => {
@@ -329,49 +329,6 @@ export class PollsService {
         )
 
         return polls
-        
-        // const skip =  10 * (page - 1)
-        // const direction = order !== 'end_date' ? 'desc' : 'asc'
-        // let where = {
-        // }
-        // if (searchTerm) {
-        //     where['OR'] = [
-        //         {
-        //             title: { contains: searchTerm }
-        //         },
-        //         {
-        //             question: { contains: searchTerm }
-        //         },
-
-        //     ]
-        // } else if (!ended) {
-        //     where['OR'] = [
-        //         {
-        //             'end_date': { equals: null }
-        //         },
-        //         {
-        //             'end_date': {
-        //                 gte: dayjs().toISOString(),
-        //             }
-        //         }
-        //     ]
-        // }
-        // where['AND'] = {
-        //     visibility: 'public',
-        // }
-        // return prisma.poll.findMany({
-        //     where,
-        //     orderBy: { [order]: direction },
-        //     select: {
-        //         id: true,
-        //         title: true,
-        //         question: true,
-        //         created: true,
-        //         end_date: true
-        //     },
-        //     skip,
-        //     take
-        // })
     }
 
 }
