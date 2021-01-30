@@ -1,5 +1,5 @@
 import { Controller, Body, Post, Param, Delete, Query, Get, HttpException, HttpStatus, UseGuards, Req  } from '@nestjs/common';
-import { CreatePollDto } from './dto/CreatePoll.dto';
+import { CreatePollDto } from './dto/createPoll.dto';
 import { VoteDto } from './dto/Vote.dto';
 import { ValidationPipe } from './pipes/polls.pipe';
 import { PollsService } from './polls.service';
