@@ -19,10 +19,10 @@ export class PollsController {
     @Query('order') order: string = 'created',
     @Query('ended') ended: string = 'false',
     @Query('take') take: number,
-    @Query('searchTerm') searchTerm: string,
+    @Query('searchTerm') searchTerm: string = '',
   ) {
     const booleanEnded = ended === 'true' ? true : false
-    return this.pollsService.getPollList({page, order, ended: booleanEnded, take, searchTerm})
+    return this.pollsService.getPollList({page, order, ended: booleanEnded, take: Number(take), searchTerm})
   }
 
   @Get('/:pollId')
