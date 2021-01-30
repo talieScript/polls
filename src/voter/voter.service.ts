@@ -1,5 +1,5 @@
 import { Injectable, forwardRef, Inject } from '@nestjs/common';
-import { PrismaClient, FindOneVoterArgs } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { EmailService } from 'src/email/email.service';
 import { PollsService } from '../polls/polls.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,7 +22,7 @@ export class VoterService {
     ) {}
 
     async voterValidationWithIp({ipAddress, answers, pollId}): Promise<VoteValidationRrturn> {
-        const pollVoters: {voters: string[]} = await prisma.poll.findOne({
+        const pollVoters: {voters: string[]} = await prisma.poll.findUnique({
             where: {id: pollId},
             select: { voters: true },
         });
@@ -74,12 +74,12 @@ export class VoterService {
     }
 
     async voterValidationWithEmail({email, ipAddress, answers, pollId, user}): Promise<VoteValidationRrturn> {
-        const pollVoters: {voters: string[]} = await prisma.poll.findOne({
+        const pollVoters: {voters: string[]} = await prisma.poll.findUnique({
             where: {id: pollId},
             select: { voters: true },
         }) as {voters: string[]};
 
-        const currentVoter = await prisma.voter.findOne({
+        const currentVoter = await prisma.voter.findUnique({
             where: {email: user?.email || email},
         });
 
@@ -95,7 +95,7 @@ export class VoterService {
 
         // If no record of voter with that email or asked by the frontend to validate then send email confirmation email.
         if (!currentVoter || !user) {
-            const pendingEmail = await prisma.pendingEmail.findOne({
+            const pendingEmail = await prisma.pendingEmail.findUnique({
                 where: {email: user?.email || email},
             });
             // if this voter has already voted and the email is awaiting validation
@@ -156,8 +156,8 @@ export class VoterService {
         });
     }
 
-    async getVoter(findOptions: FindOneVoterArgs) {
-        return await prisma.voter.findOne(findOptions);
+    async getVoter(findOptions) {
+        return await prisma.voter.findUnique(findOptions);
     }
 
     async getAnswersForPoll({voterEmail, voterIp, pollId}) {

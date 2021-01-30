@@ -28,7 +28,7 @@ export class PollsService {
         if (select) {
             delete findOptions.include
         }
-        const poll = await prisma.poll.findOne(findOptions)
+        const poll = await prisma.poll.findUnique(findOptions as any)
         if (!poll) {
             throw new HttpException({
                 status: HttpStatus.NOT_FOUND,
@@ -73,7 +73,7 @@ export class PollsService {
             }
 
             // If there is a voter then they have already voted
-            const voter = await prisma.voter.findOne({
+            const voter = await prisma.voter.findUnique({
                 where: {
                     id: pollVoterId
                 }
@@ -181,7 +181,7 @@ export class PollsService {
         });
 
         // Get poll and parse poll options
-        const pollData: { options: string, voters: string[] } = await prisma.poll.findOne({
+        const pollData: { options: string, voters: string[] } = await prisma.poll.findUnique({
             where: {id: pollId},
             select: {options: true, voters: true},
         });
@@ -234,19 +234,19 @@ export class PollsService {
         // Add votes to answers
 
         const answersFromDatabase: Answer[] = await Promise.all(answers.map(answerId => {
-            return prisma.answer.findOne({
+            return prisma.answer.findUnique({
                 where: { id: answerId },
             });
         }));
 
         const pollId = await answersFromDatabase[0].Poll;
 
-        const poll = await prisma.poll.findOne({
+        const poll = await prisma.poll.findUnique({
             where: { id: pollId },
             select: { voters: true, totalVotes: true },
         });
 
-        const voter = await prisma.voter.findOne({
+        const voter = await prisma.voter.findUnique({
             where: {
                 id: voterId
             },
@@ -280,7 +280,7 @@ export class PollsService {
     }
 
     async deletePoll(id) {
-        const poll = await prisma.poll.findOne({
+        const poll = await prisma.poll.findUnique({
             where: { id },
         });
 
@@ -302,7 +302,7 @@ export class PollsService {
     }
 
     async getAnswers(pollId) {
-        return await prisma.poll.findOne({
+        return await prisma.poll.findUnique({
             where: { id: pollId },
             select: { Answers: true, totalVotes: true }
         })

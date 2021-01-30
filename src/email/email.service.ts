@@ -58,7 +58,7 @@ export class EmailService {
     async validateEmail(email) {
 
         // Get the pending email data
-        const pendingEmailData: PendingEmailData = await prisma.pendingEmail.findOne({
+        const pendingEmailData: PendingEmailData = await prisma.pendingEmail.findUnique({
             where: { email },
         });
 
@@ -97,7 +97,7 @@ export class EmailService {
     }
 
     async resend(email) {
-        const pendingEmail = await prisma.pendingEmail.findOne({
+        const pendingEmail = await prisma.pendingEmail.findUnique({
             where: {
                 email
             }

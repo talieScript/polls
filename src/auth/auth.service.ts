@@ -89,7 +89,7 @@ export class AuthService {
       }, 406);
     }
     // check there is a pending request and it hsa not expired
-    const pendingRequest = await prisma.forgottenPasswordPendingEmail.findOne({
+    const pendingRequest = await prisma.forgottenPasswordPendingEmail.findUnique({
       where: {
         id
       }
@@ -101,7 +101,7 @@ export class AuthService {
       }, 403);
     }
 
-    const voter = await prisma.voter.findOne({
+    const voter = await prisma.voter.findUnique({
       where: { email: pendingRequest.email }
     })
 

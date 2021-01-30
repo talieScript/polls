@@ -24,7 +24,7 @@ export class DeletePollGuard implements CanActivate {
     const voter = args.user
     const pollId = args.params.pollId
     
-    const poll = await this.prisma.poll.findOne({
+    const poll = await this.prisma.poll.findUnique({
       where: { id: pollId }
     })
 
