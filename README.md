@@ -7,6 +7,7 @@ This is the api for polls-frontend (pollsimply.com)
 * [Node.js](https://nodejs.org/en/) - Node.js is an open-source, cross-platform, back-end, JavaScript runtime environment 
 * [Nest.js](https://nestjs.com/) - A progressive Node.js framework 
 * [Digital Ocean](https://www.digitalocean.com/) - Cloud service to deploy applications
+* [PM2](https://pm2.keymetrics.io/) - For running the apps on the Digital Ocean droplet
 
 ## Developing locally
 
