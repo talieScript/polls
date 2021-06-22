@@ -26,8 +26,8 @@ model PendingEmail {
 
 model ForgottenPasswordPendingEmail {
   created DateTime @default(now())
-  email   String @unique
-  id      String @id
+  email   String   @unique
+  id      String   @id
 }
 
 model Poll {
@@ -41,19 +41,21 @@ model Poll {
   voterEmail String?
   Answers    Answer[]
   visibility String
-  tags       String[] 
-  totalVotes Int @default(0)
+  tags       String[]
+  totalVotes Int       @default(0)
   deleted    DateTime?
+  Voter      Voter?    @relation(fields: [voterId], references: [id])
+  voterId    String?
 }
 
 model Voter {
-  email       String?  @unique
-  id          String   @id
-  ip          String?
-  Answers     String[]
-  password    String?
-  varified    Boolean @default(false)
-  picture     String?
-  name        String?
-  polls       Poll[]
+  email    String?  @unique
+  id       String   @id
+  ip       String?
+  Answers  String[]
+  password String?
+  varified Boolean  @default(false)
+  picture  String?
+  name     String?
+  polls    Poll[]
 }
