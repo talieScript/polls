@@ -61,3 +61,7 @@ Make sure you are in the root dir and run this command:
 ```
 pm2 logs
 ```
+
+## Infomation
+
+- Env files can be found in 1password
